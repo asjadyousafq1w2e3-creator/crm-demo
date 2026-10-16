@@ -1,7 +1,7 @@
 # expressdiabetics — CRM display demo
 
 Professional medicine wholesale landing page for pharmacies, plus the **original Pharmacy Outreach CRM interface**.
-The CRM is a display-only showcase with 974 original pharmacy business names and city/state, plus sample activity. No database, secrets, account
+The CRM is a display-only showcase with 974 original pharmacy records, plus sample activity. No database, secrets, account
 setup, paid service, or email connection is required.
 
 ## Deploy to Vercel
@@ -37,7 +37,7 @@ Pharmacy photography is self-hosted; source and license details are in `public/i
 
 Browse the original dashboard, search/filter the pharmacy snapshot, open profiles and campaigns,
 read example conversations, explore verification/follow-up/settings screens, change themes,
-and export the pharmacy name/location snapshot. Changes, real sending, uploads, and external account
+and export the pharmacy records. Changes, real sending, uploads, and external account
 connections are disabled.
 
 The **Open CRM** button enters directly. **B2B demo login** shows the original sign-in form:
@@ -50,5 +50,6 @@ Password: ExpressDiabetics2026!
 See [VERCEL_DEPLOY.md](VERCEL_DEPLOY.md) for optional main-domain and CRM-subdomain setup.
 
 Light mode is the default. Page subtitles, onboarding steps, and supplementary guides are hidden
-in the CRM demo. Registry contacts, street addresses, licence identifiers and notes are not
-included in the public snapshot.
+in the CRM demo. The owner has approved publishing the pharmacy records, including available
+business contacts, addresses, identifiers, notes and recorded statuses. Original user accounts,
+passwords, mailbox credentials and private application settings are excluded.

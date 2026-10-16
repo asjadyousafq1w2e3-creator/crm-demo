@@ -1,7 +1,7 @@
 # expressdiabetics — display-only Vercel demo
 
 **Ready to deploy without a database, backend service, account setup, or secrets.**
-This copy shows the original Pharmacy Outreach CRM screens with a static snapshot of 974 original pharmacy names and city/state, plus sample activity.
+This copy shows the original Pharmacy Outreach CRM screens with a static snapshot of 974 original pharmacy records, plus sample activity.
 It does not replace the CRM interface with another application.
 
 ## Deploy
@@ -20,7 +20,7 @@ campaign worker, or storage service is used.
 | `/` | Medicine wholesale landing page with a sample catalog and stock previews |
 | `/crm` | Original CRM dashboard, directly accessible |
 | `/login?next=/crm` | Original sign-in screen, prefilled with public demo details |
-| `/pharmacies`, `/campaigns`, `/inbox`, etc. | Original CRM screens, using the pharmacy name/location snapshot and sample activity |
+| `/pharmacies`, `/campaigns`, `/inbox`, etc. | Original CRM screens, using the original pharmacy records and sample activity |
 
 Search, filters, navigation, profile/campaign previews, theme switching, and sample CSV
 exports work. Forms and live operations show a display-only notice. Nothing is saved,
@@ -66,5 +66,7 @@ The original working CRM code is retained behind the explicit `CRM_SHOWCASE_MODE
 opt-out. Leave showcase mode enabled for this public demo.
 
 Light mode is the default and supplementary CRM guides are hidden. The registry snapshot
-contains business names and city/state only; original contact details and identifiers are
-excluded.
+contains the 974 original pharmacy records and their available business contacts, addresses,
+identifiers, notes and recorded statuses, approved for publication by the owner. Sample
+campaigns and conversations remain illustrative. Original user accounts, passwords, mailbox
+credentials and private application settings are excluded.

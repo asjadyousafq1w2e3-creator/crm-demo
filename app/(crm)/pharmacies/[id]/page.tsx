@@ -149,6 +149,13 @@ export default async function PharmacyDetail({ params }: { params: Promise<{ id:
         </div>
       </div>
 
+      {p.notes && (
+        <div className="card p-3.5">
+          <h2 className="text-[13px] font-semibold mb-2">Notes</h2>
+          <p className="text-[13px] whitespace-pre-wrap break-words">{p.notes}</p>
+        </div>
+      )}
+
       {/* ---- source evidence: mandatory per the brief ---------------------------- */}
       <div className="card p-3.5">
         <h2 className="text-[13px] font-semibold mb-2">Source evidence</h2>

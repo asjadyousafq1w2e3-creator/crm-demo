@@ -29,6 +29,8 @@ function add(model: string, patch: Row): Row {
   }
   Object.assign(row, { id: data[model].length + 1 }, patch);
   for (const field of schema.get(model)!.fields) {
+    if (field.type === "DateTime" && typeof row[field.name] === "string")
+      row[field.name] = new Date(row[field.name] as string);
     if (field.type === "String" && row[field.name] instanceof Date)
       row[field.name] = (row[field.name] as Date).toISOString().slice(0, 10);
   }
@@ -37,6 +39,15 @@ function add(model: string, patch: Row): Row {
 }
 
 const pharmacyCount = registry.records.length;
+const snapshotDate = new Date(`${registry.snapshotDate}T00:00:00Z`);
+const importMapping: Record<string, string> = {
+  name: "canonicalName", streetAddress: "streetAddress", city: "city", state: "state",
+  zipCode: "zipCode", phone: "phone", email: "email", website: "website",
+  ownerName: "ownerName", notes: "notes",
+};
+const importValues = (pharmacy: Row) => Object.fromEntries(
+  Object.values(importMapping).map(field => [field, pharmacy[field]])
+);
 const byState = registry.records.reduce<Record<string, number>>((counts, pharmacy) => {
   if (pharmacy.state) counts[pharmacy.state] = (counts[pharmacy.state] || 0) + 1;
   return counts;
@@ -49,21 +60,17 @@ for (const [key, value] of Object.entries({ "company.name": "expressdiabetics", 
 add("ImportBatch", { label: "Original pharmacy registry", source: "Original CRM snapshot", sourceType: "MANUAL", jurisdiction: "US", status: "OK", datasetDate: ago(1), startedAt: ago(1), completedAt: ago(1), recordsReceived: pharmacyCount, recordsAccepted: pharmacyCount, recordsRejected: 0, recordsReviewRequired: 0, duplicatesPrevented: 0 });
 for (let i = 0; i < 2; i++) add("Mailbox", { emailAddress: `${i ? "partnerships" : "hello"}@expressdiabetics.example`, displayName: i ? "Partnerships" : "Community outreach", provider: "MOCK", domain: "expressdiabetics.example", status: "CONNECTED", healthStatus: "HEALTHY", rampStage: "ESTABLISHED", dailyLimit: 20, sentToday: 4 + i, sentDate: now.toISOString().slice(0, 10), sendingStartTime: "09:00", sendingEndTime: "16:00", timezone: "America/New_York", connectedAt: ago(10), lastSyncedAt: ago(0, 1) });
 registry.records.forEach((pharmacy) => {
-  // Only organization names and city/state are published. Original contacts and identifiers
-  // stay in the local source CRM; this snapshot does not claim any business is verified.
-  const p = add("Pharmacy", {
-    canonicalName: pharmacy.canonicalName, normalizedName: pharmacy.canonicalName.toLowerCase(),
-    city: pharmacy.city, state: pharmacy.state, dataStatus: "DATA_READY",
-    verificationStatus: "READY_FOR_VERIFICATION", campaignEligible: false,
-    licenseStatus: "UNKNOWN", ownershipStatus: "UNKNOWN", operationalStatus: "UNKNOWN",
-    emailVerificationStatus: "NOT_CHECKED", leadStatus: "NOT_CONTACTED", crmStatus: "NEW",
-    status: "ACTIVE", sourceMissing: false, importBatchId: 1,
-  });
-  for (const field of ["canonicalName", "city", "state"]) {
-    if (p[field]) add("FieldProvenance", { pharmacyId: p.id, field, value: p[field], sourceId: "ORIGINAL_CRM", sourceType: "MANUAL", authorityRank: 1, isSelected: true, datasetDate: ago(1), retrievedAt: ago(1) });
+  // Business records are published with the owner's approval. Demo IDs are local;
+  // real user accounts, mailbox credentials and operational history are not imported.
+  const { contacts, identifiers, ...record } = pharmacy;
+  const p = add("Pharmacy", { ...record, importBatchId: 1 });
+  for (const contact of contacts) add("PharmacyContact", { ...contact, pharmacyId: p.id });
+  for (const identifier of identifiers) add("PharmacyIdentifier", { ...identifier, pharmacyId: p.id });
+  for (const field of ["canonicalName", "streetAddress", "city", "state", "zipCode", "phone", "email", "website", "ownerName", "picName", "buyerName", "primaryLicenseNumber", "npi", "ncpdpId"]) {
+    if (p[field]) add("FieldProvenance", { pharmacyId: p.id, field, value: p[field], sourceId: "ORIGINAL_CRM", sourceType: "MANUAL", authorityRank: 1, isSelected: true, datasetDate: snapshotDate, retrievedAt: snapshotDate });
   }
-  for (const dimension of ["LICENSE", "OWNERSHIP", "OPERATIONAL_STATUS", "PHARMACY_TYPE", "CONTACT"]) {
-    add("VerificationTask", { pharmacyId: p.id, verificationType: dimension, status: "NOT_STARTED", priority: "NORMAL", trigger: "IMPORT", batchId: 1 });
+  for (const [dimension, field] of Object.entries({ LICENSE: "licenseVerificationStatus", OWNERSHIP: "ownershipVerificationStatus", OPERATIONAL_STATUS: "operationalVerificationStatus", PHARMACY_TYPE: "pharmacyTypeVerificationStatus", CONTACT: "contactVerificationStatus" })) {
+    add("VerificationTask", { pharmacyId: p.id, verificationType: dimension, status: p[field], priority: "NORMAL", trigger: "IMPORT", batchId: 1 });
   }
 });
 for (const [i, name] of ["Independent pharmacy introductions", "Community partnership follow-up", "Welcome to the network"].entries()) {
@@ -84,8 +91,8 @@ replies.forEach((text, i) => {
 });
 for (let i = 0; i < 6; i++) add("FollowUp", { pharmacyId: i + 1, conversationId: i < 4 ? i + 1 : null, dueAt: ago(i < 2 ? 1 : -i), status: "PENDING", note: ["Share the partnership overview", "Schedule an introductory call", "Send a short introduction", "Follow up on the proposal", "Review the contact details", "Prepare the welcome message"][i], kind: i % 2 ? "CALL" : "EMAIL", priority: i < 2 ? "HIGH" : "NORMAL", assignedToId: 2, createdBy: "Jamie Demo", snoozeCount: 0 });
 add("EmailVerificationBatch", { name: "Verification round", status: "EXPORTED", scope: {}, provider: "DEMO", total: 0, checkedCount: 0, valid: 0, invalid: 0, risky: 0, catchAll: 0, unknown: 0, createdById: 1, exportedAt: ago(1) });
-add("ImportJob", { name: "Original pharmacy registry", sourceType: "MANUAL", jurisdiction: "US", datasetDate: ago(1), status: "COMMITTED", declaredColumns: ["pharmacy_name", "city", "state"], mapping: { name: "pharmacy_name", city: "city", state: "state" }, fileName: "original_pharmacies.csv", fileFormat: "CSV", fileBytes: 0, totalRows: pharmacyCount, analysis: { accepted: pharmacyCount, review: 0, excluded: 0, totalRows: pharmacyCount, withEmail: 0, withPhone: 0, sharedInboxes: 0, duplicates: 0, ruleCounts: {}, byState }, batchId: 1, createdById: 1, committedAt: ago(1) });
-data.Pharmacy.forEach((p, i) => add("ImportRow", { jobId: 1, rowNumber: i + 1, raw: { pharmacy_name: p.canonicalName, city: p.city, state: p.state }, cleaned: { name: p.canonicalName, city: p.city, state: p.state }, decision: "ACCEPTED", notes: [], pharmacyId: p.id }));
+add("ImportJob", { name: "Original pharmacy registry", sourceType: "MANUAL", jurisdiction: "US", datasetDate: snapshotDate, status: "COMMITTED", declaredColumns: Object.values(importMapping), mapping: importMapping, fileName: "original_pharmacies.json", fileFormat: "JSON", fileBytes: Buffer.byteLength(JSON.stringify(registry)), totalRows: pharmacyCount, analysis: { accepted: pharmacyCount, review: 0, excluded: 0, totalRows: pharmacyCount, withEmail: registry.records.filter(p => p.email).length, withPhone: registry.records.filter(p => p.phone).length, sharedInboxes: registry.records.filter(p => p.emailKind === "SHARED").length, duplicates: 0, ruleCounts: {}, byState }, batchId: 1, createdById: 1, committedAt: snapshotDate });
+data.Pharmacy.forEach((p, i) => add("ImportRow", { jobId: 1, rowNumber: i + 1, raw: importValues(p), cleaned: { ...importValues(p), name: p.canonicalName }, decision: "ACCEPTED", notes: [], pharmacyId: p.id }));
 for (let i = 0; i < 14; i++) add("AuditEvent", { eventType: ["IMPORT_COMPLETED", "VERIFICATION_RECORDED", "CAMPAIGN_CREATED", "FOLLOW_UP_CREATED"][i % 4], pharmacyId: i + 1, actor: "Jamie Demo", actorId: 1, actorRole: "OWNER", detail: null, createdAt: ago(i) });
 add("SuppressionEntry", { email: "do-not-contact@expressdiabetics.example", reason: "UNSUBSCRIBED", source: "DEMO", notes: "Fictional sample suppression entry." });
 add("EmailTemplate", { name: "A friendly pharmacy introduction", kind: "INTRODUCTION", subject: "A new connection for {{pharmacy_name}}", bodyText: "Hello {{owner_name}},\n\nWe’d love to learn more about your pharmacy.\n\nexpressdiabetics", bodyHtml: "<p>A sample pharmacy introduction.</p>", purpose: "Fictional sample template", timesUsed: 2, createdBy: "Jamie Demo" });
