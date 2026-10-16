@@ -17,7 +17,7 @@ campaign worker, or storage service is used.
 
 | URL | Opens |
 | --- | --- |
-| `/` | Premium Pharmacy First landing page |
+| `/` | Medicine wholesale landing page with a sample catalog and stock previews |
 | `/crm` | Original CRM dashboard, directly accessible |
 | `/login?next=/crm` | Original sign-in screen, prefilled with public demo details |
 | `/pharmacies`, `/campaigns`, `/inbox`, etc. | Original CRM screens, using fictional sample data |
@@ -25,6 +25,10 @@ campaign worker, or storage service is used.
 Search, filters, navigation, profile/campaign previews, theme switching, and sample CSV
 exports work. Forms and live operations show a display-only notice. Nothing is saved,
 sent, imported, or connected. Original CRM components and layouts are retained.
+
+The landing page includes medicine category filters, product search, detail previews, and
+B2B demo login. All product packaging and stock quantities are illustrative; ordering and
+payments are unavailable in this display demo.
 
 ## Public demo credentials
 
