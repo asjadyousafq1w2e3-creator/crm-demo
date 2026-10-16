@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Brand, Arrow, Check } from "./brand";
-import { Icon, type IconName } from "@/components/icon";
+import { Icon } from "@/components/icon";
 
 type Links = { crm: string; login: string; home: string; demoEmail: string; demoPassword: string };
 type Category = "All medicines" | "Tablets" | "Capsules" | "Vitamins";
@@ -17,10 +18,10 @@ const medicines: Medicine[] = [
   { name: "Omeprazole", category: "Capsules", label: "CAPSULES", sku: "PF-006", stock: 160, color: "#a36455", pale: "#f3e9e4", form: "box", tag: "Capsule range" },
 ];
 const categories: Category[] = ["All medicines", "Tablets", "Capsules", "Vitamins"];
-const benefits: { icon: IconName; title: string; text: string }[] = [
-  { icon: "inventory_2", title: "A range for your shelves", text: "From everyday medicines to wellness essentials, explore a range built around pharmacy procurement." },
-  { icon: "storefront", title: "Pharmacy comes first", text: "A wholesale partner focused on the businesses that care for our communities, every day." },
-  { icon: "groups", title: "A more personal partnership", text: "Keep your pharmacy relationship at the heart of supply, with a dedicated business workspace." },
+const benefits = [
+  { title: "Medicines", text: "Tablets and capsules across a selection of everyday pharmacy lines." },
+  { title: "Health & wellness", text: "Vitamins and wellness essentials alongside your medicine range." },
+  { title: "Pharmacy business", text: "A B2B workspace for pharmacy profiles, contacts, and business relationships." },
 ];
 
 function MedicinePack({ medicine, className = "" }: { medicine: Medicine; className?: string }) {
@@ -62,51 +63,124 @@ export function Landing({ links }: { links: Links }) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Medicine | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
-  useEffect(() => { if (selected && !dialog.current?.open) dialog.current?.showModal(); }, [selected]);
+  useEffect(() => {
+    if (!selected) return;
+    if (!dialog.current?.open) dialog.current?.showModal();
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previous; };
+  }, [selected]);
   const filtered = medicines.filter(m => (category === "All medicines" || m.category === category) && `${m.name} ${m.category}`.toLowerCase().includes(search.trim().toLowerCase()));
   const closeMenu = () => setMenuOpen(false);
 
   return <main className="pf-site">
     <a className="pf-skip" href="#main-content">Skip to content</a>
-    <div className="pf-announcement"><div className="pf-container"><span>Medicine wholesale. <strong>With your pharmacy in mind.</strong></span><a href="#demo">Explore the B2B demo <Arrow/></a></div></div>
-    <header className="pf-header"><div className="pf-container pf-header-inner">
-      <Link href={links.home} aria-label="Pharmacy First home"><Brand/></Link>
-      <nav id="pf-main-nav" className={`pf-nav ${menuOpen ? "is-open" : ""}`} aria-label="Main navigation"><a href="#medicines" onClick={closeMenu}>Our medicines</a><a href="#why-us" onClick={closeMenu}>Why Pharmacy First</a><a href="#stock" onClick={closeMenu}>Stock preview</a><a className="pf-mobile-crm" href={links.crm}>Open CRM <Arrow diagonal/></a></nav>
-      <div className="pf-header-actions"><a className="pf-crm-link" href={links.crm}>Open CRM <Arrow diagonal/></a><a className="pf-button pf-button-small" href={links.login}>B2B demo login <Arrow/></a><button type="button" className="pf-menu-button" aria-controls="pf-main-nav" aria-expanded={menuOpen} aria-label={menuOpen ? "Close navigation" : "Open navigation"} onClick={() => setMenuOpen(!menuOpen)}><Icon name={menuOpen ? "close" : "tune"} size={22}/></button></div>
-    </div></header>
+    <div className="pf-utility">
+      <div className="pf-container">
+        <span>Pharmaceutical wholesale for pharmacy businesses</span>
+        <div><span>Product showcase · Demo stock</span><a href="#faq">Help & information</a></div>
+      </div>
+    </div>
+    <header className="pf-header">
+      <div className="pf-container pf-header-inner">
+        <Link className="pf-brand-link" href={links.home} aria-label="Pharmacy First home">
+          <Brand/><span className="pf-brand-descriptor">PHARMACEUTICAL WHOLESALE</span>
+        </Link>
+        <nav id="pf-main-nav" className={`pf-nav ${menuOpen ? "is-open" : ""}`} aria-label="Main navigation">
+          <a href="#medicines" onClick={closeMenu}>Medicines</a>
+          <a href="#why-us" onClick={closeMenu}>About us</a>
+          <a href="#stock" onClick={closeMenu}>Stock overview</a>
+          <a className="pf-mobile-crm" href={links.crm}>Open CRM <Arrow diagonal/></a>
+        </nav>
+        <div className="pf-header-actions">
+          <a className="pf-crm-link" href={links.crm}>Open CRM <Arrow diagonal/></a>
+          <a className="pf-button pf-button-small" href={links.login}>B2B demo login <Arrow/></a>
+          <button type="button" className="pf-menu-button" aria-controls="pf-main-nav" aria-expanded={menuOpen} aria-label={menuOpen ? "Close navigation" : "Open navigation"} onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <Icon name="close" size={23}/> : <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg>}
+          </button>
+        </div>
+      </div>
+    </header>
+
     <section className="pf-hero pf-container" id="main-content">
-      <div className="pf-hero-copy"><span className="pf-eyebrow"><span className="pf-status-dot"/> YOUR PHARMACY. OUR PRIORITY.</span><h1>Behind every<br/>well-stocked<br/>pharmacy.<span>There’s a partner.</span></h1><p>Medicines for your shelves. A partnership for your business. Discover wholesale supply built around the needs of your pharmacy.</p><div className="pf-hero-buttons"><a className="pf-button" href="#medicines">Explore our medicines <Arrow/></a><a className="pf-text-link" href={links.login}>B2B demo login <Arrow diagonal/></a></div><div className="pf-hero-reassurance"><Check>Medicine wholesale</Check><Check>Made for pharmacies</Check></div></div>
-      <div className="pf-hero-visual" aria-label="Illustrative medicine range and sample stock preview">
-        <div className="pf-visual-ring pf-ring-one"/><div className="pf-visual-ring pf-ring-two"/><span className="pf-visual-label">THE EVERYDAY ESSENTIALS COLLECTION</span>
-        <div className="pf-hero-stock"><span className="pf-stock-icon"><Icon name="inventory_2" size={20}/></span><div><strong>A shelf-ready selection</strong><span>Explore our sample medicine range</span></div><span className="pf-stock-check"><Icon name="check_circle" size={19}/></span></div>
-        <div className="pf-hero-packs"><MedicinePack medicine={medicines[1]} className="pf-hero-pack-back"/><MedicinePack medicine={medicines[0]} className="pf-hero-pack-front"/><MedicinePack medicine={medicines[2]} className="pf-hero-pack-bottle"/></div>
-        <div className="pf-hero-collection"><span className="pf-collection-cross">+</span><div><strong>Good care starts<br/>with the right supply.</strong><span>PHARMACY FIRST. ALWAYS.</span></div></div><span className="pf-visual-disclaimer">Illustrative packaging · sample catalog</span>
+      <div className="pf-hero-copy">
+        <span className="pf-eyebrow">PHARMACY FIRST / TRADE SUPPLY</span>
+        <h1>Wholesale medicine<br/>supply for<br/><span>your pharmacy.</span></h1>
+        <p>Medicines and wellness essentials for pharmacy businesses. Explore our product range and discover a business partner focused on pharmacy supply.</p>
+        <div className="pf-hero-buttons">
+          <a className="pf-button" href="#medicines">Browse medicines <Arrow/></a>
+          <a className="pf-button pf-button-outline" href={links.login}>B2B demo login <Arrow diagonal/></a>
+        </div>
+        <div className="pf-hero-footnote"><span/>Serving the pharmacy trade</div>
+      </div>
+      <figure className="pf-hero-image">
+        <Image src="/images/pharmacy-professional.webp" alt="A pharmacist checking medicine stock on pharmacy shelves" width={1600} height={1067} priority sizes="(max-width: 760px) 100vw, 50vw"/>
+        <figcaption><span>FOCUSED ON PHARMACY</span><span>From medicine supply to business relationships.</span></figcaption>
+      </figure>
+    </section>
+
+    <section className="pf-supply-strip" aria-label="Our supply focus">
+      <div className="pf-container">{benefits.map((benefit, i) => <div key={benefit.title}>
+        <span className="pf-strip-number">0{i + 1}</span><div><h2>{benefit.title}</h2><p>{benefit.text}</p></div>
+      </div>)}</div>
+    </section>
+
+    <section className="pf-section pf-container" id="medicines">
+      <div className="pf-section-heading">
+        <div><span className="pf-eyebrow">PRODUCT CATALOG</span><h2>Featured medicines</h2><p>Browse a selection of medicines and wellness products.</p></div>
+        <a className="pf-inline-link" href="#stock">View stock overview <Arrow/></a>
+      </div>
+      <div className="pf-catalog-controls">
+        <div className="pf-filters" role="group" aria-label="Medicine categories">{categories.map(c => <button type="button" key={c} aria-pressed={c === category} onClick={() => setCategory(c)}>{c}</button>)}</div>
+        <label className="pf-search"><Icon name="search" size={20}/><input type="search" aria-label="Search medicines" placeholder="Search the range" value={search} onChange={e => setSearch(e.target.value)}/></label>
+      </div>
+      <div className="pf-catalog-summary"><span role="status">{filtered.length} medicines</span><span><i/>Demo catalog · Illustrative availability</span></div>
+      <div className="pf-product-grid">{filtered.map(medicine => <article className="pf-product-card" key={medicine.sku}>
+        <div className="pf-product-art"><MedicinePack medicine={medicine}/><span className="pf-art-note">PRODUCT ILLUSTRATION</span><button type="button" className="pf-product-quick" aria-label={`View ${medicine.name} details`} onClick={() => setSelected(medicine)}><Arrow diagonal/></button></div>
+        <div className="pf-product-info">
+          <div className="pf-product-type">{medicine.category}<span>{medicine.sku}</span></div>
+          <h3>{medicine.name}</h3>
+          <div className="pf-product-bottom"><span className={`pf-availability ${medicine.stock < 50 ? "is-limited" : ""}`}><i/>{medicine.stock < 50 ? "Limited sample stock" : "In sample stock"}</span><span>{medicine.stock} packs</span></div>
+          <button type="button" className="pf-product-link" onClick={() => setSelected(medicine)}>View medicine <Arrow/></button>
+        </div>
+      </article>)}</div>
+      {filtered.length === 0 && <div className="pf-empty"><Icon name="search" size={28}/><h3>No medicines found</h3><p>Try a different search or browse all categories.</p><button type="button" className="pf-button pf-button-small" onClick={() => { setCategory("All medicines"); setSearch(""); }}>Show all medicines <Arrow/></button></div>}
+      <p className="pf-catalog-footnote">Product illustrations and quantities are sample content. Actual products, specifications, and availability are not confirmed by this demo.</p>
+    </section>
+
+    <section className="pf-about-section" id="why-us">
+      <div className="pf-container pf-about-layout">
+        <div><span className="pf-eyebrow">ABOUT PHARMACY FIRST</span><h2>A supply business.<br/>Built around pharmacies.</h2></div>
+        <div className="pf-about-copy"><p>Pharmacy First supplies medicines to pharmacies. Our focus is straightforward: the products your business needs and the relationships that support it.</p><p>From medicines to wellness products, our range is presented with pharmacy procurement in mind. The B2B demo gives you a look at the business workspace behind those relationships.</p><a className="pf-inline-link" href="#demo">Explore business access <Arrow/></a></div>
+      </div>
+      <div className="pf-container pf-business-details"><div><span>OUR CUSTOMERS</span><strong>Pharmacy businesses</strong></div><div><span>OUR RANGE</span><strong>Medicines & wellness</strong></div><div><span>OUR FOCUS</span><strong>Wholesale supply</strong></div></div>
+    </section>
+
+    <section className="pf-section pf-container pf-stock-section" id="stock">
+      <div className="pf-stock-copy"><span className="pf-eyebrow">STOCK AT A GLANCE</span><h2>A clearer view<br/>of the range.</h2><p>Review product categories and sample pack quantities before exploring the business demo.</p><a className="pf-inline-link" href="#medicines">Browse the medicine catalog <Arrow/></a><p className="pf-small-note">Sample quantities only. This is not live stock.</p></div>
+      <div className="pf-stock-board">
+        <div className="pf-board-heading"><h3>Stock overview</h3><span className="pf-sample-label">DEMO DATA</span></div>
+        <div className="pf-stock-table-wrap"><table className="pf-stock-table"><thead><tr><th>Medicine</th><th>Category</th><th>Sample packs</th><th><span className="pf-visually-hidden">Details</span></th></tr></thead><tbody>{[medicines[0], medicines[1], medicines[4], medicines[2]].map(m => <tr key={m.sku}><td><span className={`pf-table-dot ${m.stock < 50 ? "is-limited" : ""}`}/><strong>{m.name}</strong><small>{m.sku}</small></td><td>{m.category}</td><td>{m.stock.toLocaleString()}</td><td><button type="button" aria-label={`Preview ${m.name} stock`} onClick={() => setSelected(m)}><Arrow diagonal/></button></td></tr>)}</tbody></table></div>
+        <div className="pf-board-footer"><Icon name="info" size={15}/><span>Stock figures are for presentation purposes.</span></div>
       </div>
     </section>
-    <div className="pf-service-strip"><div className="pf-container"><span className="pf-strip-intro">A WHOLESALE PARTNER.<strong>A pharmacy-first approach.</strong></span><span><Icon name="inventory_2" size={22}/> Everyday medicines</span><span><Icon name="storefront" size={22}/> Pharmacy supply</span><span><Icon name="groups" size={22}/> B2B relationships</span><span><Icon name="monitor_heart" size={22}/> Wellness essentials</span></div></div>
-    <section className="pf-section pf-container" id="medicines">
-      <div className="pf-section-heading"><div><span className="pf-eyebrow">THE RANGE BEHIND YOUR COUNTER</span><h2>Everyday essentials.<br/><span>All in good company.</span></h2></div><div className="pf-heading-aside"><p>A look at the medicines and wellness products in our wholesale range.</p><span className="pf-sample-label"><span className="pf-status-dot"/> SAMPLE CATALOG & STOCK</span></div></div>
-      <div className="pf-catalog-controls"><div className="pf-filters" role="group" aria-label="Medicine categories">{categories.map(c => <button type="button" key={c} aria-pressed={c === category} onClick={() => setCategory(c)}>{c}</button>)}</div><label className="pf-search"><Icon name="search" size={19}/><input type="search" aria-label="Search medicines" placeholder="Find a medicine…" value={search} onChange={e => setSearch(e.target.value)}/></label></div>
-      <div className="pf-catalog-summary"><span role="status">Showing {filtered.length} of {medicines.length} featured medicines</span><span>Illustrative stock. Not live availability.</span></div>
-      <div className="pf-product-grid">{filtered.map(medicine => <article className="pf-product-card" key={medicine.sku}>
-        <div className="pf-product-art" style={{ "--art-bg": medicine.pale } as CSSProperties}><span className="pf-product-tag">{medicine.tag}</span><MedicinePack medicine={medicine}/><span className="pf-art-note">ILLUSTRATIVE PACK</span><button type="button" className="pf-product-quick" aria-label={`View ${medicine.name} details`} onClick={() => setSelected(medicine)}><Arrow diagonal/></button></div>
-        <div className="pf-product-info"><div className="pf-product-type">{medicine.category}<span>{medicine.sku}</span></div><h3>{medicine.name}</h3><div className="pf-product-bottom"><span className={`pf-availability ${medicine.stock < 50 ? "is-limited" : ""}`}><i/>{medicine.stock < 50 ? "Limited sample stock" : "In sample stock"}</span><span>{medicine.stock} packs</span></div><button type="button" className="pf-product-link" onClick={() => setSelected(medicine)}>View medicine <Arrow/></button></div>
-      </article>)}</div>
-      {filtered.length === 0 && <div className="pf-empty"><Icon name="search" size={30}/><h3>No medicines found</h3><p>Try another name or browse the full sample range.</p><button type="button" className="pf-button pf-button-small" onClick={() => { setCategory("All medicines"); setSearch(""); }}>Show all medicines <Arrow/></button></div>}
-      <div className="pf-catalog-footnote"><Icon name="info" size={17}/><p>This is a product showcase. Names, packaging, and stock quantities are for demonstration; they are not a live offer or an ordering service.</p></div>
+
+    <section className="pf-demo-section pf-container" id="demo">
+      <div className="pf-demo-intro"><span className="pf-eyebrow">BUSINESS ACCESS</span><h2>Explore the<br/>B2B workspace.</h2><p>Open the original CRM and browse sample pharmacy profiles, contacts, campaigns, and conversations.</p><div className="pf-demo-promises"><Check>Original CRM interface</Check><Check>Prepared sample records</Check><Check>No account setup required</Check></div><a className="pf-demo-direct" href={links.crm}>Open the original CRM <Arrow diagonal/></a></div>
+      <div className="pf-demo-access"><div className="pf-access-top"><span className="pf-access-label">DEMO ACCOUNT</span><Icon name="lock" size={18}/></div><h3>B2B demo login</h3><p>Use these public credentials to explore the original sign-in experience.</p><Credentials email={links.demoEmail} password={links.demoPassword}/><a className="pf-button" href={links.login}>B2B demo login <Arrow/></a><p className="pf-demo-disclosure">Display-only demo with fictional records. Changes are not saved and live transactions are disabled.</p></div>
     </section>
-    <section className="pf-partner-section" id="why-us"><div className="pf-container"><div className="pf-partner-heading"><span className="pf-eyebrow">MORE THAN MEDICINES</span><h2>Your shelves matter.<br/><span>So does your business.</span></h2><p>Independent pharmacies do more than dispense medicines. They support entire communities. We put the business behind that care first.</p><a className="pf-inline-link" href="#demo">Meet your B2B workspace <Arrow/></a></div><div className="pf-benefits">{benefits.map((benefit, i) => <article key={benefit.title}><span className="pf-benefit-icon"><Icon name={benefit.icon} size={26}/></span><div><span className="pf-benefit-number">0{i + 1}</span><h3>{benefit.title}</h3><p>{benefit.text}</p></div></article>)}</div></div></section>
-    <section className="pf-section pf-container pf-stock-section" id="stock"><div className="pf-stock-copy"><span className="pf-eyebrow">A CLEARER VIEW OF YOUR NEXT RESTOCK</span><h2>Your essentials.<br/><span>At a glance.</span></h2><p>Explore a sample of the range your pharmacy relies on. Product categories and pack availability, together in one easy view.</p><div className="pf-stock-key"><span><i/>Available in the sample</span><span><i className="is-amber"/>Limited in the sample</span></div><a className="pf-button pf-button-outline" href="#medicines">Browse featured medicines <Arrow/></a><p className="pf-small-note">All quantities shown are fictional demo stock.</p></div><div className="pf-stock-board"><div className="pf-board-heading"><span><Icon name="inventory_2" size={20}/> Stock overview</span><span className="pf-sample-label">DEMO DATA</span></div><div className="pf-board-columns"><span>MEDICINE / CATEGORY</span><span>SAMPLE PACKS</span></div>{[medicines[0], medicines[1], medicines[4], medicines[2]].map((m, i) => <div className="pf-stock-row" key={m.sku}><span className="pf-stock-row-icon" style={{ color: m.color, background: m.pale }}><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4"><rect x="7" y="2" width="10" height="20" rx="5" transform={i % 2 ? "rotate(35 12 12)" : "rotate(-35 12 12)"}/><path d={i % 2 ? "m8 9 8 6" : "m8 15 8-6"}/></svg></span><div><strong>{m.name}</strong><span>{m.category} · {m.sku}</span></div><div className="pf-stock-quantity"><strong>{m.stock}<small> packs</small></strong><div><span style={{ width: `${m.stock / 2.4}%`, background: m.stock < 50 ? "#c8984b" : "#72917b" }}/></div></div></div>)}<div className="pf-board-footer"><span className="pf-status-dot"/>Sample availability preview<a href="#medicines">View range <Arrow/></a></div></div></section>
-    <section className="pf-demo-section pf-container" id="demo"><div className="pf-demo-intro"><span className="pf-eyebrow"><span className="pf-status-dot"/> YOUR B2B DEMO ACCESS</span><h2>Come on in.<br/>Your business<br/><span>belongs here.</span></h2><p>Take a look inside our business workspace. The B2B demo opens the original CRM, with sample pharmacy profiles, business relationships, and conversations ready to explore.</p><div className="pf-demo-promises"><Check>Original CRM interface</Check><Check>Sample pharmacy records</Check><Check>No setup needed</Check></div><div className="pf-demo-signoff"><Brand/><span>For the business of better pharmacy.</span></div></div><div className="pf-demo-access"><div className="pf-access-top"><span className="pf-access-icon"><Icon name="fingerprint" size={27}/></span><span className="pf-access-pill">DISPLAY-ONLY DEMO</span></div><h3>A little look behind the counter.</h3><p>Use the public details below to try the original login.</p><Credentials email={links.demoEmail} password={links.demoPassword}/><a className="pf-button pf-button-lime" href={links.login}>B2B demo login <Arrow/></a><a className="pf-demo-direct" href={links.crm}>Open the original CRM directly <Arrow diagonal/></a><div className="pf-demo-disclosure"><Icon name="info" size={17}/><p>A display-only preview with fictional data. Orders, payments, saving, sending, uploads, and external connections are disabled.</p></div></div></section>
-    <section className="pf-section pf-container pf-faq" id="faq"><div><span className="pf-eyebrow">GOOD TO KNOW</span><h2>A few questions.<br/><span>A little clarity.</span></h2><p>Everything you need before taking a look around.</p></div><div className="pf-faq-list">{[
-      ["Who is Pharmacy First for?", "Pharmacy First is a medicine wholesale business serving pharmacies. This website introduces the product range and gives pharmacy businesses a look at the B2B workspace."],
-      ["Are the medicine stocks on this page live?", "No. The featured medicines, packaging, product codes, and stock quantities are illustrative demo content. They do not confirm actual availability, pricing, or supply terms."],
-      ["Can I place an order in the demo?", "This is a visual demo. You can browse the sample catalog and explore the original CRM, but orders, payments, saving, and live communications are disabled."],
-      ["How do I open the B2B demo?", "Choose B2B demo login and use the public credentials shown above. The login opens the original CRM interface. You can also choose Open CRM in the header to explore it directly."],
+
+    <section className="pf-section pf-container pf-faq" id="faq"><div><span className="pf-eyebrow">INFORMATION</span><h2>Frequently asked<br/>questions</h2><p>About our business and this demonstration.</p></div><div className="pf-faq-list">{[
+      ["Who does Pharmacy First supply?", "Pharmacy First is a medicine wholesale business serving pharmacies. This website introduces the product range and provides access to a demonstration of the business workspace."],
+      ["Are the medicine stocks on this page live?", "No. Product illustrations, product codes, and stock quantities are sample content. They do not confirm actual availability, pricing, or supply terms."],
+      ["Can I place an order in the demo?", "This is a visual demonstration. You can browse the sample catalog and explore the original CRM. Orders, payments, saving, and live communications are disabled."],
+      ["How do I access the business demo?", "Select B2B demo login and use the public credentials above. You can also select Open CRM in the header to enter the original CRM directly."],
     ].map(([question, answer]) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</div></section>
-    <footer className="pf-footer"><div className="pf-container pf-footer-top"><div><Link href={links.home} aria-label="Pharmacy First home"><Brand/></Link><p>Behind your shelves.<br/>Beside your business.</p><span className="pf-footer-caption">MEDICINE WHOLESALE FOR PHARMACIES</span></div><div><span>EXPLORE THE RANGE</span><a href="#medicines">Featured medicines</a><a href="#stock">Sample stock</a><a href="#why-us">Why Pharmacy First</a></div><div><span>YOUR BUSINESS</span><a href={links.login}>B2B demo login <Arrow diagonal/></a><a href={links.crm}>Original CRM <Arrow diagonal/></a><a href="#demo">Demo login details</a><a href="#faq">Common questions</a></div><div className="pf-footer-message"><span className="pf-status-dot"/>Your pharmacy.<br/><strong>Always first.</strong></div></div><div className="pf-container pf-footer-bottom"><span>© 2026 Pharmacy First.</span><span>Display-only showcase · sample catalog and stock</span><a href="#main-content">Back to top ↑</a></div></footer>
+
+    <footer className="pf-footer"><div className="pf-container pf-footer-top"><div><Link href={links.home} aria-label="Pharmacy First home"><Brand/></Link><p>Pharmaceutical wholesale.<br/>Focused on your pharmacy.</p></div><div><span>PRODUCTS</span><a href="#medicines">Medicine catalog</a><a href="#stock">Stock overview</a></div><div><span>COMPANY</span><a href="#why-us">About Pharmacy First</a><a href="#faq">Help & information</a></div><div><span>BUSINESS ACCESS</span><a href={links.login}>B2B demo login <Arrow diagonal/></a><a href={links.crm}>Open original CRM <Arrow diagonal/></a><a href="#demo">Demo account details</a></div></div><div className="pf-container pf-footer-bottom"><span>© 2026 Pharmacy First</span><span>Demonstration website. Product and stock information is illustrative.</span><a href="#main-content">Back to top ↑</a></div></footer>
+
     <dialog className="pf-product-dialog" ref={dialog} aria-labelledby="pf-product-title" onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
-      {selected && <div className="pf-dialog-content"><button type="button" className="pf-dialog-close" aria-label="Close medicine details" onClick={() => dialog.current?.close()}><Icon name="close" size={22}/></button><div className="pf-dialog-art" style={{ background: selected.pale }}><MedicinePack medicine={selected}/><span>ILLUSTRATIVE PACKAGING</span></div><div className="pf-dialog-copy"><span className="pf-eyebrow">SAMPLE WHOLESALE CATALOG</span><h2 id="pf-product-title">{selected.name}</h2><p>{selected.category} · {selected.sku}</p><dl><div><dt>Sample stock</dt><dd>{selected.stock} packs</dd></div><div><dt>Category</dt><dd>{selected.category}</dd></div><div><dt>Availability</dt><dd>Demonstration only</dd></div></dl><p className="pf-dialog-note">Fictional stock and illustrative packaging. This preview does not offer medicines for sale or confirm product specifications.</p><a className="pf-button" href={links.login}>Explore the B2B demo <Arrow/></a></div></div>}
+      {selected && <div className="pf-dialog-content"><button type="button" className="pf-dialog-close" aria-label="Close medicine details" onClick={() => dialog.current?.close()}><Icon name="close" size={22}/></button><div className="pf-dialog-art"><MedicinePack medicine={selected}/><span>PRODUCT ILLUSTRATION</span></div><div className="pf-dialog-copy"><span className="pf-eyebrow">SAMPLE PRODUCT DETAILS</span><h2 id="pf-product-title">{selected.name}</h2><p>{selected.category} · {selected.sku}</p><dl><div><dt>Sample stock</dt><dd>{selected.stock} packs</dd></div><div><dt>Category</dt><dd>{selected.category}</dd></div><div><dt>Availability</dt><dd>Demo only</dd></div></dl><p className="pf-dialog-note">Illustrative packaging and fictional quantities. Product specifications and supply terms are not confirmed by this demo.</p><a className="pf-button" href={links.login}>Explore the B2B demo <Arrow/></a></div></div>}
     </dialog>
   </main>;
 }

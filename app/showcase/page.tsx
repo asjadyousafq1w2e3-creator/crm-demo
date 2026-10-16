@@ -2,7 +2,7 @@ import { Landing } from "@/components/showcase/landing";
 import { showcaseLinks } from "@/lib/showcase-links";
 import "../showcase.css";
 
-export const metadata = { title: { absolute: "Pharmacy First — Medicine wholesale. Pharmacy first." }, description: "Medicine wholesale built around your pharmacy. Explore featured medicines, illustrative stock availability, and the Pharmacy First B2B demo with access to the original CRM." };
+export const metadata = { title: { absolute: "Pharmacy First | Wholesale Medicine Supply for Pharmacies" }, description: "Wholesale medicines and wellness essentials for pharmacy businesses. Browse the Pharmacy First sample catalog, stock overview, and B2B business demo." };
 
 export default async function ShowcasePage() {
   return <Landing links={await showcaseLinks()} />;

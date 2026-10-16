@@ -1,6 +1,6 @@
 # Pharmacy First — CRM display demo
 
-Premium medicine wholesale landing page for pharmacies, plus the **original Pharmacy Outreach CRM interface**.
+Professional medicine wholesale landing page for pharmacies, plus the **original Pharmacy Outreach CRM interface**.
 The CRM is a display-only showcase with fictional records. No database, secrets, account
 setup, paid service, or email connection is required.
 
@@ -33,6 +33,7 @@ Open http://localhost:3000 for the landing page or http://localhost:3000/crm for
 
 The landing page includes six featured medicines, category filters, product search, medicine
 detail previews, and a stock overview. Packaging and stock quantities are illustrative.
+Pharmacy photography is self-hosted; source and license details are in `public/images/PHOTOGRAPHY.md`.
 
 Browse the original dashboard, search/filter sample records, open profiles and campaigns,
 read example conversations, explore verification/follow-up/settings screens, change themes,
