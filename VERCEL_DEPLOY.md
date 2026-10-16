@@ -1,4 +1,4 @@
-# Pharmacy First — display-only Vercel demo
+# expressdiabetics — display-only Vercel demo
 
 **Ready to deploy without a database, backend service, account setup, or secrets.**
 This copy shows the original Pharmacy Outreach CRM screens with fictional sample data.
@@ -33,8 +33,8 @@ payments are unavailable in this display demo.
 ## Public demo credentials
 
 ```text
-Email: demo@pharmacyfirst.example
-Password: PharmacyFirst2026!
+Email: demo@expressdiabetics.example
+Password: ExpressDiabetics2026!
 ```
 
 These are just public display-demo details; they are not credentials for any real system.

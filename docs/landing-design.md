@@ -1,4 +1,4 @@
-# Pharmacy First public site design
+# expressdiabetics public site design
 
 Reviewed 16 October 2026. These are design references, not business affiliations.
 
@@ -7,7 +7,7 @@ Reviewed 16 October 2026. These are design references, not business affiliations
 - [Cencora United Kingdom](https://www.cencora.com/global-reach/europe/united-kingdom): inspected the rendered page, headline and body typography, utility navigation, prominent business portal access, and large brand-color sections.
 - [PHOENIX UK](https://www.phoenixmedical.co.uk/en/): inspected the rendered page, strong headline hierarchy, readable explanatory copy, and dedicated portal access.
 
-The Pharmacy First page uses its own branding, wording, images, product illustrations, and layout. No competitor logos, claims, statistics, or licensed brand fonts are included.
+The expressdiabetics page uses its own branding, wording, images, product illustrations, and layout. No competitor logos, claims, statistics, or licensed brand fonts are included.
 
 ## Typography
 

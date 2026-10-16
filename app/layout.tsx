@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import localFont from "next/font/local";
+import { isCrmShowcase } from "@/lib/showcase-mode";
 
 // Both self-hosted: no Google Fonts request at runtime, and the app works offline.
 const inter = localFont({ src: "../public/fonts/inter-latin.woff2", variable: "--font-inter", display: "swap", weight: "100 900" });
@@ -12,7 +13,7 @@ const symbols = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Pharmacy Outreach CRM", template: "%s · Pharmacy Outreach CRM" },
+  title: { default: isCrmShowcase() ? "expressdiabetics CRM" : "Pharmacy Outreach CRM", template: isCrmShowcase() ? "%s · expressdiabetics" : "%s · Pharmacy Outreach CRM" },
   description: "Verified pharmacy master registry and outreach",
   icons: { icon: "/favicon.svg", apple: "/favicon.svg" },
 };

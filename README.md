@@ -1,4 +1,4 @@
-# Pharmacy First — CRM display demo
+# expressdiabetics — CRM display demo
 
 Professional medicine wholesale landing page for pharmacies, plus the **original Pharmacy Outreach CRM interface**.
 The CRM is a display-only showcase with fictional records. No database, secrets, account
@@ -43,8 +43,8 @@ connections are disabled.
 The **Open CRM** button enters directly. **B2B demo login** shows the original sign-in form:
 
 ```text
-Email: demo@pharmacyfirst.example
-Password: PharmacyFirst2026!
+Email: demo@expressdiabetics.example
+Password: ExpressDiabetics2026!
 ```
 
 See [VERCEL_DEPLOY.md](VERCEL_DEPLOY.md) for optional main-domain and CRM-subdomain setup.

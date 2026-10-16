@@ -26,7 +26,7 @@ export default async function Login({ searchParams }: {
         <div className="w-full max-w-[360px]">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <div className="text-[15px] font-semibold tracking-tight">Pharmacy Outreach</div>
+              <div className="text-[15px] font-semibold tracking-tight">{showcase ? "expressdiabetics" : "Pharmacy Outreach"}</div>
               <div className="text-[12px] text-muted">Registry &amp; CRM</div>
             </div>
             <ThemeToggle initial={themeMode} />

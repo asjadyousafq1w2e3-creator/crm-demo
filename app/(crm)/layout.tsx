@@ -160,7 +160,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
             </span>
             <span className="min-w-0">
               <span className="block t-title text-sidebar-ink leading-tight truncate">
-                Verified Pharmacy
+                {isCrmShowcase() ? "expressdiabetics" : "Verified Pharmacy"}
               </span>
               <span className="block text-[0.6875rem] text-sidebar-muted leading-tight">
                 Outreach CRM

@@ -28,7 +28,7 @@ function MedicinePack({ medicine, className = "" }: { medicine: Medicine; classN
   return <div className={`pf-pack pf-pack-${medicine.form} ${className}`} style={{ "--pack-color": medicine.color, "--pack-pale": medicine.pale } as CSSProperties} aria-hidden="true">
     {medicine.form === "bottle" && <div className="pf-bottle-cap"/>}
     <div className="pf-pack-face">
-      <span className="pf-pack-brand"><svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor"><path d="M7 1h6v6h6v6h-6v6H7v-6H1V7h6Z"/></svg> pharmacyfirst.</span>
+      <span className="pf-pack-brand"><svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor"><path d="M7 1h6v6h6v6h-6v6H7v-6H1V7h6Z"/></svg> expressdiabetics.</span>
       <div className="pf-pack-name">{medicine.name}<span>{medicine.label}</span></div>
       <div className="pf-pack-band"><span>PHARMACY RANGE</span><svg viewBox="0 0 64 38" fill="none"><rect x="4" y="4" width="52" height="22" rx="11" transform="rotate(13 4 4)" stroke="currentColor"/><path d="m31 9-5 22" stroke="currentColor"/></svg></div>
       <span className="pf-pack-base">ILLUSTRATIVE PACKAGING</span>
@@ -83,7 +83,7 @@ export function Landing({ links }: { links: Links }) {
     </div>
     <header className="pf-header">
       <div className="pf-container pf-header-inner">
-        <Link className="pf-brand-link" href={links.home} aria-label="Pharmacy First home">
+        <Link className="pf-brand-link" href={links.home} aria-label="expressdiabetics home">
           <Brand/><span className="pf-brand-descriptor">PHARMACEUTICAL WHOLESALE</span>
         </Link>
         <nav id="pf-main-nav" className={`pf-nav ${menuOpen ? "is-open" : ""}`} aria-label="Main navigation">
@@ -104,7 +104,7 @@ export function Landing({ links }: { links: Links }) {
 
     <section className="pf-hero-section" id="main-content"><div className="pf-hero pf-container">
       <div className="pf-hero-copy">
-        <span className="pf-eyebrow">PHARMACY FIRST / TRADE SUPPLY</span>
+        <span className="pf-eyebrow">EXPRESSDIABETICS / TRADE SUPPLY</span>
         <h1>Wholesale medicine<span>for your pharmacy.</span></h1>
         <p>Medicines and wellness essentials for pharmacy businesses. Explore our product range and discover a business partner focused on pharmacy supply.</p>
         <div className="pf-hero-buttons">
@@ -150,8 +150,8 @@ export function Landing({ links }: { links: Links }) {
 
     <section className="pf-about-section" id="why-us">
       <div className="pf-container pf-about-layout">
-        <div><span className="pf-eyebrow">ABOUT PHARMACY FIRST</span><h2>A supply business.<br/>Built around pharmacies.</h2></div>
-        <div className="pf-about-copy"><p>Pharmacy First supplies medicines to pharmacies. Our focus is straightforward: the products your business needs and the relationships that support it.</p><p>From medicines to wellness products, our range is presented with pharmacy procurement in mind. The B2B demo gives you a look at the business workspace behind those relationships.</p><a className="pf-inline-link" href="#demo">Explore business access <Arrow/></a></div>
+        <div><span className="pf-eyebrow">ABOUT EXPRESSDIABETICS</span><h2>A supply business.<br/>Built around pharmacies.</h2></div>
+        <div className="pf-about-copy"><p>expressdiabetics supplies medicines to pharmacies. Our focus is straightforward: the products your business needs and the relationships that support it.</p><p>From medicines to wellness products, our range is presented with pharmacy procurement in mind. The B2B demo gives you a look at the business workspace behind those relationships.</p><a className="pf-inline-link" href="#demo">Explore business access <Arrow/></a></div>
       </div>
       <div className="pf-container pf-business-details"><div><span>OUR CUSTOMERS</span><strong>Pharmacy businesses</strong></div><div><span>OUR RANGE</span><strong>Medicines & wellness</strong></div><div><span>OUR FOCUS</span><strong>Wholesale supply</strong></div></div>
     </section>
@@ -171,13 +171,13 @@ export function Landing({ links }: { links: Links }) {
     </section>
 
     <section className="pf-section pf-container pf-faq" id="faq"><div><span className="pf-eyebrow">INFORMATION</span><h2>Frequently asked<br/>questions</h2><p>About our business and this demonstration.</p></div><div className="pf-faq-list">{[
-      ["Who does Pharmacy First supply?", "Pharmacy First is a medicine wholesale business serving pharmacies. This website introduces the product range and provides access to a demonstration of the business workspace."],
+      ["Who does expressdiabetics supply?", "expressdiabetics is a medicine wholesale business serving pharmacies. This website introduces the product range and provides access to a demonstration of the business workspace."],
       ["Are the medicine stocks on this page live?", "No. Product illustrations, product codes, and stock quantities are sample content. They do not confirm actual availability, pricing, or supply terms."],
       ["Can I place an order in the demo?", "This is a visual demonstration. You can browse the sample catalog and explore the original CRM. Orders, payments, saving, and live communications are disabled."],
       ["How do I access the business demo?", "Select B2B demo login and use the public credentials above. You can also select Open CRM in the header to enter the original CRM directly."],
     ].map(([question, answer]) => <details key={question}><summary>{question}<span>+</span></summary><p>{answer}</p></details>)}</div></section>
 
-    <footer className="pf-footer"><div className="pf-container pf-footer-top"><div><Link href={links.home} aria-label="Pharmacy First home"><Brand/></Link><p>Pharmaceutical wholesale.<br/>Focused on your pharmacy.</p></div><div><span>PRODUCTS</span><a href="#medicines">Medicine catalog</a><a href="#stock">Stock overview</a></div><div><span>COMPANY</span><a href="#why-us">About Pharmacy First</a><a href="#faq">Help & information</a></div><div><span>BUSINESS ACCESS</span><a href={links.login}>B2B demo login <Arrow diagonal/></a><a href={links.crm}>Open original CRM <Arrow diagonal/></a><a href="#demo">Demo account details</a></div></div><div className="pf-container pf-footer-bottom"><span>© 2026 Pharmacy First</span><span>Demonstration website. Product and stock information is illustrative.</span><a href="#main-content">Back to top ↑</a></div></footer>
+    <footer className="pf-footer"><div className="pf-container pf-footer-top"><div><Link href={links.home} aria-label="expressdiabetics home"><Brand/></Link><p>Pharmaceutical wholesale.<br/>Focused on your pharmacy.</p></div><div><span>PRODUCTS</span><a href="#medicines">Medicine catalog</a><a href="#stock">Stock overview</a></div><div><span>COMPANY</span><a href="#why-us">About expressdiabetics</a><a href="#faq">Help & information</a></div><div><span>BUSINESS ACCESS</span><a href={links.login}>B2B demo login <Arrow diagonal/></a><a href={links.crm}>Open original CRM <Arrow diagonal/></a><a href="#demo">Demo account details</a></div></div><div className="pf-container pf-footer-bottom"><span>© 2026 expressdiabetics</span><span>Demonstration website. Product and stock information is illustrative.</span><a href="#main-content">Back to top ↑</a></div></footer>
 
     <dialog className="pf-product-dialog" ref={dialog} aria-labelledby="pf-product-title" onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
       {selected && <div className="pf-dialog-content"><button type="button" className="pf-dialog-close" aria-label="Close medicine details" onClick={() => dialog.current?.close()}><Icon name="close" size={22}/></button><div className="pf-dialog-art"><MedicinePack medicine={selected}/><span>PRODUCT ILLUSTRATION</span></div><div className="pf-dialog-copy"><span className="pf-eyebrow">SAMPLE PRODUCT DETAILS</span><h2 id="pf-product-title">{selected.name}</h2><p>{selected.category} · {selected.sku}</p><dl><div><dt>Sample stock</dt><dd>{selected.stock} packs</dd></div><div><dt>Category</dt><dd>{selected.category}</dd></div><div><dt>Availability</dt><dd>Demo only</dd></div></dl><p className="pf-dialog-note">Illustrative packaging and fictional quantities. Product specifications and supply terms are not confirmed by this demo.</p><a className="pf-button" href={links.login}>Explore the B2B demo <Arrow/></a></div></div>}

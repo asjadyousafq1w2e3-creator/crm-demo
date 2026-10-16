@@ -7,4 +7,4 @@
 - License: https://unsplash.com/license
 - Downloaded: 2026-10-16
 
-This is stock photography used to illustrate pharmacy work, not a photograph of Pharmacy First employees or premises.
+This is stock photography used to illustrate pharmacy work, not a photograph of expressdiabetics employees or premises.
