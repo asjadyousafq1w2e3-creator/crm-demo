@@ -1,0 +1,15 @@
+node_modules
+.next
+.next-demo/
+.next-showcase/
+# Every environment file except the checked-in template. A production deployment keeps its
+# secrets in .env.production, which must never be committed.
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+storage/
+
+.vercel/
+.DS_Store

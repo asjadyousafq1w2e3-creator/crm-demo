@@ -1,0 +1,881 @@
+// Mirrors the Phase 3 master registry. Postgres for deployment on AWS / DigitalOcean.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Pharmacy {
+  id              Int     @id @default(autoincrement())
+  canonicalName   String  @map("canonical_name")
+  normalizedName  String? @map("normalized_name")
+  doingBusinessAs String? @map("doing_business_as")
+  pharmacyType    String? @map("pharmacy_type")
+
+  streetAddress String? @map("street_address")
+  addressLine2  String? @map("address_line_2")
+  city          String?
+  county        String?
+  state         String?
+  zipCode       String? @map("zip_code")
+
+  phone     String?
+  email     String?
+  website   String?
+  ownerName String? @map("owner_name")
+  picName   String? @map("pic_name")
+  buyerName String? @map("buyer_name")
+
+  primaryLicenseNumber String? @map("primary_license_number")
+  licenseStatus        String? @map("license_status")
+  licenseType          String? @map("license_type")
+  npi                  String?
+  ncpdpId              String? @map("ncpdp_id")
+  numberOfLocations    Int?    @map("number_of_locations")
+
+  // three deliberately separate concepts
+  dataStatus         String  @default("DATA_READY") @map("data_status")
+  verificationStatus String  @default("READY_FOR_VERIFICATION") @map("verification_status")
+  campaignEligible   Boolean @default(false) @map("campaign_eligible")
+
+  ownershipStatus         String    @default("UNKNOWN") @map("ownership_status")
+  operationalStatus       String    @default("UNKNOWN") @map("operational_status")
+  emailVerificationStatus String    @default("NOT_CHECKED") @map("email_verification_status")
+  /**
+   * PERSONAL | SHARED | UNKNOWN. A shared inbox (info@, pharmacy@) is kept - for an independent
+   * pharmacy it is often the only address published - but labelled, so a campaign can target
+   * named contacts separately rather than the distinction being lost at import.
+   */
+  emailKind               String    @default("UNKNOWN") @map("email_kind")
+  /**
+   * When this address was last checked, so a stale result can be re-verified on purpose.
+   */
+  emailCheckedAt          DateTime? @map("email_checked_at")
+  /**
+   * The provider's own verdict, kept verbatim alongside our normalised status.
+   */
+  emailCheckDetail        String?   @map("email_check_detail")
+  /**
+   * Where the address came from - the client's deliverable asks for it per record.
+   */
+  emailSource             String?   @map("email_source")
+  /**
+   * When this record's information was last confirmed against a source.
+   */
+  verifiedAt              DateTime? @map("verified_at")
+  /**
+   * Free-text observations carried into the delivered file.
+   */
+  notes                   String?
+  crmStatus               String    @default("NEW") @map("crm_status")
+  exclusionReason         String?   @map("exclusion_reason")
+
+  licenseVerificationStatus      String @default("NOT_STARTED") @map("license_verification_status")
+  ownershipVerificationStatus    String @default("NOT_STARTED") @map("ownership_verification_status")
+  operationalVerificationStatus  String @default("NOT_STARTED") @map("operational_verification_status")
+  pharmacyTypeVerificationStatus String @default("NOT_STARTED") @map("pharmacy_type_verification_status")
+  contactVerificationStatus      String @default("NOT_STARTED") @map("contact_verification_status")
+
+  status        String    @default("ACTIVE")
+  sourceMissing Boolean   @default(false) @map("source_missing")
+  missingSince  DateTime? @map("missing_since")
+
+  importBatchId Int?         @map("import_batch_id")
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // CRM lead status, distinct from crmStatus (Phase 3 record lifecycle).
+  leadStatus String @default("NOT_CONTACTED") @map("lead_status")
+
+  /**
+   * The mailbox that owns the relationship with this pharmacy - set on the first successful send
+   * and reused afterwards, so the same person always hears from the same address.
+   */
+  assignedMailboxId Int?     @map("assigned_mailbox_id")
+  assignedMailbox   Mailbox? @relation(fields: [assignedMailboxId], references: [id], onDelete: SetNull)
+
+  contacts           PharmacyContact[]
+  tasks              VerificationTask[]
+  provenance         FieldProvenance[]
+  changes            FieldChange[]
+  identifiers        PharmacyIdentifier[]
+  campaignRecipients CampaignRecipient[]
+  conversations      Conversation[]
+  emailVerifications EmailVerificationItem[]
+  followUps          FollowUp[]
+
+  @@index([state])
+  @@index([city])
+  @@index([verificationStatus])
+  @@index([importBatchId])
+  @@index([email])
+  @@index([phone])
+  @@index([normalizedName])
+  @@index([state, primaryLicenseNumber])
+  @@index([leadStatus])
+  @@index([assignedMailboxId])
+  @@map("pharmacy_master")
+}
+
+model PharmacyContact {
+  id          Int      @id @default(autoincrement())
+  pharmacyId  Int      @map("pharmacy_id")
+  pharmacy    Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  name        String?
+  role        String   @default("UNKNOWN")
+  email       String?
+  phone       String?
+  sourceId    String   @map("source_id")
+  sourceType  String   @map("source_type")
+  sourceUrl   String?  @map("source_url")
+  retrievedAt DateTime @map("retrieved_at")
+  emailStatus String   @default("DISCOVERED") @map("email_status")
+  isPrimary   Boolean  @default(false) @map("is_primary")
+
+  @@index([pharmacyId])
+  @@map("pharmacy_contact")
+}
+
+model PharmacyIdentifier {
+  id           Int      @id @default(autoincrement())
+  pharmacyId   Int      @map("pharmacy_id")
+  pharmacy     Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  kind         String
+  value        String
+  jurisdiction String?
+  sourceId     String   @map("source_id")
+  recordedAt   DateTime @map("recorded_at")
+
+  @@index([pharmacyId])
+  @@index([kind, value])
+  @@map("pharmacy_identifier")
+}
+
+// One row per (field, source, value). Sources never overwrite each other.
+model FieldProvenance {
+  id            Int      @id @default(autoincrement())
+  pharmacyId    Int      @map("pharmacy_id")
+  pharmacy      Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  field         String
+  value         String?
+  sourceId      String   @map("source_id")
+  sourceType    String   @map("source_type")
+  sourceUrl     String?  @map("source_url")
+  authorityRank Int      @map("authority_rank")
+  isSelected    Boolean  @default(false) @map("is_selected")
+  datasetDate   String?  @map("dataset_date")
+  retrievedAt   DateTime @map("retrieved_at")
+
+  @@index([pharmacyId, field])
+  @@map("field_provenance")
+}
+
+model FieldChange {
+  id         Int       @id @default(autoincrement())
+  pharmacyId Int?      @map("pharmacy_id")
+  pharmacy   Pharmacy? @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  sourceId   String    @map("source_id")
+  field      String
+  oldValue   String?   @map("old_value")
+  newValue   String?   @map("new_value")
+  changeType String    @map("change_type")
+  detectedAt DateTime  @map("detected_at")
+
+  @@index([pharmacyId, detectedAt])
+  @@map("field_change")
+}
+
+model VerificationTask {
+  id               Int       @id @default(autoincrement())
+  pharmacyId       Int       @map("pharmacy_id")
+  pharmacy         Pharmacy  @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  verificationType String    @map("verification_type")
+  status           String    @default("NOT_STARTED")
+  priority         Int       @default(50)
+  trigger          String
+  batchId          Int?      @map("batch_id")
+  assignedAt       DateTime? @map("assigned_at")
+  startedAt        DateTime? @map("started_at")
+  completedAt      DateTime? @map("completed_at")
+  result           String?
+  notes            String?
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  results VerificationResult[]
+
+  @@index([pharmacyId])
+  @@index([status, verificationType])
+  @@map("verification_task")
+}
+
+model VerificationResult {
+  id               Int              @id @default(autoincrement())
+  taskId           Int              @map("task_id")
+  task             VerificationTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  pharmacyId       Int              @map("pharmacy_id")
+  verificationType String           @map("verification_type")
+  result           String
+  verifiedBy       String           @map("verified_by")
+  verifiedAt       DateTime         @map("verified_at")
+  evidenceSource   String?          @map("evidence_source")
+  evidenceUrl      String?          @map("evidence_url")
+  notes            String?
+
+  @@index([pharmacyId, verificationType])
+  @@map("verification_result")
+}
+
+model ImportBatch {
+  importJobs ImportJob[]
+
+  id                    Int       @id @default(autoincrement())
+  label                 String
+  source                String
+  sourceType            String    @map("source_type")
+  jurisdiction          String?
+  datasetDate           String?   @map("dataset_date")
+  startedAt             DateTime  @map("started_at")
+  completedAt           DateTime? @map("completed_at")
+  status                String    @default("RUNNING")
+  recordsReceived       Int       @default(0) @map("records_received")
+  recordsAccepted       Int       @default(0) @map("records_accepted")
+  recordsUpdated        Int       @default(0) @map("records_updated")
+  recordsUnchanged      Int       @default(0) @map("records_unchanged")
+  recordsRejected       Int       @default(0) @map("records_rejected")
+  recordsReviewRequired Int       @default(0) @map("records_review_required")
+  duplicatesPrevented   Int       @default(0) @map("duplicates_prevented")
+  contentSha256         String?   @map("content_sha256")
+  detail                String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  pharmacies Pharmacy[]
+
+  @@index([source, datasetDate])
+  @@map("pharmacy_import_batch")
+}
+
+// ============================ PHASE 4 — OUTREACH ============================
+
+model Mailbox {
+  id                    Int     @id @default(autoincrement())
+  provider              String  @default("gmail") // gmail | mock
+  emailAddress          String  @unique @map("email_address")
+  displayName           String? @map("display_name")
+  domain                String?
+  // Refresh token is encrypted at rest. Access tokens are never persisted.
+  encryptedRefreshToken String? @map("encrypted_refresh_token")
+  providerAccountId     String? @map("provider_account_id")
+  gmailHistoryId        String? @map("gmail_history_id")
+
+  status       String @default("DISCONNECTED") // CONNECTED|DISCONNECTED|WARNING|PAUSED|ERROR
+  healthStatus String @default("UNKNOWN") @map("health_status")
+  rampStage    String @default("NEW") @map("ramp_stage")
+
+  dailyLimit Int     @default(20) @map("daily_limit")
+  sentToday  Int     @default(0) @map("sent_today")
+  sentDate   String? @map("sent_date") // YYYY-MM-DD in the mailbox timezone
+
+  sendingStartTime String @default("09:00") @map("sending_start_time")
+  sendingEndTime   String @default("16:00") @map("sending_end_time")
+  timezone         String @default("America/New_York")
+
+  lastError    String?   @map("last_error")
+  connectedAt  DateTime? @map("connected_at")
+  lastSyncedAt DateTime? @map("last_synced_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  recipients         CampaignRecipient[]
+  conversations      Conversation[]
+  messages           EmailMessage[]
+  campaigns          CampaignMailbox[]
+  assignedPharmacies Pharmacy[]
+
+  @@index([status])
+  @@map("mailbox")
+}
+
+model Campaign {
+  id        Int     @id @default(autoincrement())
+  name      String
+  subject   String
+  bodyHtml  String  @map("body_html")
+  bodyText  String  @map("body_text")
+  signature String?
+
+  status String @default("DRAFT") // DRAFT|READY|SCHEDULED|RUNNING|PAUSED|COMPLETED|CANCELLED
+
+  scheduledStartAt DateTime? @map("scheduled_start_at")
+  scheduledEndAt   DateTime? @map("scheduled_end_at")
+  timezone         String    @default("America/New_York")
+  sendingDays      String    @default("1,2,3,4,5") @map("sending_days") // ISO weekday numbers
+  sendingStartTime String    @default("09:00") @map("sending_start_time")
+  sendingEndTime   String    @default("16:00") @map("sending_end_time")
+  dailyLimit       Int       @default(100) @map("daily_limit")
+
+  sentDate  String? @map("sent_date")
+  sentToday Int     @default(0) @map("sent_today")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  startedAt   DateTime? @map("started_at")
+  pausedAt    DateTime? @map("paused_at")
+  completedAt DateTime? @map("completed_at")
+  cancelledAt DateTime? @map("cancelled_at")
+
+  /**
+   * Which mailboxes this campaign may send from. Empty means "any eligible mailbox" - the
+   * pool is opt-in, so an existing campaign keeps behaving as it did.
+   */
+  mailboxes          CampaignMailbox[]
+  /**
+   * Keep using the mailbox a pharmacy was last contacted from. On by default: a recipient who
+   * hears from two different addresses about the same thing reads it as a mailing list.
+   */
+  useAssignedMailbox Boolean           @default(true) @map("use_assigned_mailbox")
+
+  recipients    CampaignRecipient[]
+  conversations Conversation[]
+  steps         CampaignStep[]
+
+  @@index([status])
+  @@index([scheduledStartAt])
+  @@map("campaign")
+}
+
+/**
+ * The explicit sending pool for a campaign.
+ */
+model CampaignMailbox {
+  campaignId Int      @map("campaign_id")
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  mailboxId  Int      @map("mailbox_id")
+  mailbox    Mailbox  @relation(fields: [mailboxId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@id([campaignId, mailboxId])
+  @@index([mailboxId])
+  @@map("campaign_mailbox")
+}
+
+model CampaignRecipient {
+  id         Int      @id @default(autoincrement())
+  campaignId Int      @map("campaign_id")
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  pharmacyId Int      @map("pharmacy_id")
+  pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  contactId  Int?     @map("contact_id")
+  mailboxId  Int?     @map("mailbox_id")
+  mailbox    Mailbox? @relation(fields: [mailboxId], references: [id])
+
+  recipientEmail String @map("recipient_email")
+
+  status      String  @default("PENDING")
+  // PENDING|BLOCKED|QUEUED|SCHEDULED|SENDING|SENT|FAILED|REPLIED|BOUNCED|UNSUBSCRIBED|CANCELLED
+  blockReason String? @map("block_reason")
+
+  queuedAt    DateTime? @map("queued_at")
+  scheduledAt DateTime? @map("scheduled_at")
+  sentAt      DateTime? @map("sent_at")
+  failedAt    DateTime? @map("failed_at")
+  repliedAt   DateTime? @map("replied_at")
+  bouncedAt   DateTime? @map("bounced_at")
+
+  providerMessageId String? @map("provider_message_id")
+  providerThreadId  String? @map("provider_thread_id")
+  // Written BEFORE the provider call so a crash mid-send cannot produce a duplicate.
+  idempotencyKey    String  @unique @map("idempotency_key")
+
+  attempts     Int     @default(0)
+  errorCode    String? @map("error_code")
+  errorMessage String? @map("error_message")
+
+  /**
+   * Position in the campaign's sequence. Step 1 is the first message; a campaign with no extra
+   * steps never advances past it and behaves exactly as it did before sequences existed.
+   */
+  stepNumber    Int       @default(1) @map("step_number")
+  /**
+   * When the next step becomes eligible. Null means there is no next step.
+   */
+  nextStepAt    DateTime? @map("next_step_at")
+  /**
+   * Why the sequence stopped early: REPLIED, BOUNCED, UNSUBSCRIBED, SUPPRESSED, MANUAL.
+   */
+  stoppedReason String?   @map("stopped_reason")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  steps CampaignRecipientStep[]
+
+  @@unique([campaignId, pharmacyId])
+  @@index([nextStepAt])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([mailboxId])
+  @@index([campaignId, status])
+  @@map("campaign_recipient")
+}
+
+model SuppressionEntry {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  reason    String // UNSUBSCRIBED|BOUNCED|COMPLAINT|MANUAL_BLOCK
+  source    String?
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@map("suppression_entry")
+}
+
+model Conversation {
+  id          Int       @id @default(autoincrement())
+  pharmacyId  Int       @map("pharmacy_id")
+  pharmacy    Pharmacy  @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  contactId   Int?      @map("contact_id")
+  campaignId  Int?      @map("campaign_id")
+  campaign    Campaign? @relation(fields: [campaignId], references: [id])
+  recipientId Int?      @map("recipient_id")
+  mailboxId   Int       @map("mailbox_id")
+  mailbox     Mailbox   @relation(fields: [mailboxId], references: [id])
+
+  providerThreadId String  @map("provider_thread_id")
+  subject          String?
+  contactEmail     String  @map("contact_email")
+
+  unread        Boolean   @default(false)
+  lastMessageAt DateTime? @map("last_message_at")
+
+  /**
+   * What kind of reply this is. Set by lib/inbox/classify.ts from the message itself, and
+   * overridable by a person - categorySource records which, so an operator's decision is never
+   * quietly replaced by the next sync.
+   * UNCATEGORISED is the honest default. The classifier declines rather than guesses.
+   */
+  category       String  @default("UNCATEGORISED")
+  // UNCATEGORISED|INTERESTED|NOT_INTERESTED|OUT_OF_OFFICE|AUTO_REPLY|WRONG_PERSON|
+  // UNSUBSCRIBE_REQUEST|QUESTION|BOUNCE
+  categoryReason String? @map("category_reason")
+  categorySource String  @default("AUTOMATIC") @map("category_source") // AUTOMATIC|OPERATOR
+
+  /**
+   * OPEN needs attention, SNOOZED comes back at snoozedUntil, CLOSED is done with.
+   */
+  state        String    @default("OPEN")
+  snoozedUntil DateTime? @map("snoozed_until")
+  closedAt     DateTime? @map("closed_at")
+
+  /**
+   * Who owns the reply. Null means nobody has picked it up.
+   */
+  assignedToId Int?     @map("assigned_to_id")
+  assignedTo   AppUser? @relation("ConversationAssignee", fields: [assignedToId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  messages EmailMessage[]
+
+  @@unique([mailboxId, providerThreadId])
+  @@index([pharmacyId])
+  @@index([lastMessageAt])
+  @@index([state, lastMessageAt])
+  @@index([category])
+  @@index([assignedToId])
+  @@map("conversation")
+}
+
+model EmailMessage {
+  id             Int          @id @default(autoincrement())
+  conversationId Int          @map("conversation_id")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  mailboxId      Int          @map("mailbox_id")
+  mailbox        Mailbox      @relation(fields: [mailboxId], references: [id])
+
+  direction         String // OUTBOUND | INBOUND
+  providerMessageId String  @map("provider_message_id")
+  providerThreadId  String  @map("provider_thread_id")
+  rfcMessageId      String? @map("rfc_message_id")
+  inReplyTo         String? @map("in_reply_to")
+  references        String?
+
+  fromAddress String  @map("from_address")
+  toAddress   String  @map("to_address")
+  ccAddress   String? @map("cc_address")
+  subject     String?
+  bodyText    String? @map("body_text")
+  bodyHtml    String? @map("body_html")
+
+  isBounce Boolean @default(false) @map("is_bounce")
+
+  sentAt     DateTime? @map("sent_at")
+  receivedAt DateTime? @map("received_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@unique([mailboxId, providerMessageId])
+  @@index([providerThreadId])
+  @@index([conversationId])
+  @@map("email_message")
+}
+
+model FollowUp {
+  id             Int       @id @default(autoincrement())
+  pharmacyId     Int       @map("pharmacy_id")
+  pharmacy       Pharmacy  @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  contactId      Int?      @map("contact_id")
+  conversationId Int?      @map("conversation_id")
+  dueAt          DateTime  @map("due_at")
+  status         String    @default("PENDING") // PENDING|DUE|COMPLETED|CANCELLED
+  note           String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  completedAt    DateTime? @map("completed_at")
+
+  /**
+   * CALL, EMAIL or CHECK - what the task actually is, so a queue can be worked by type.
+   */
+  kind     String @default("EMAIL")
+  /**
+   * NORMAL or HIGH. Two levels, because a five-level priority is a five-level guess.
+   */
+  priority String @default("NORMAL")
+
+  /**
+   * Who is meant to do it. Null means it sits in the unassigned pool.
+   */
+  assignedToId Int?     @map("assigned_to_id")
+  assignedTo   AppUser? @relation("FollowUpAssignee", fields: [assignedToId], references: [id])
+  createdBy    String?  @map("created_by")
+
+  /**
+   * How many times this has been pushed back. A task snoozed five times is not a task anybody
+   * intends to do, and the queue says so rather than hiding it.
+   */
+  snoozeCount Int @default(0) @map("snooze_count")
+
+  outcome String? // what happened when it was completed
+
+  @@index([dueAt])
+  @@index([status])
+  @@index([assignedToId, status])
+  @@map("follow_up")
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_setting")
+}
+
+/**
+ * An operator account. Replaces the single env-configured admin: the env values now only
+ * bootstrap the first OWNER, after which every account lives here.
+ */
+/**
+ * One upload, from the moment its shape is declared to the moment it is committed.
+ * The declaration comes first on purpose: an operator states what the file should contain, and
+ * the upload is then checked against that. A file that silently differs from what was expected
+ * is the single most common way a bad import happens.
+ */
+/**
+ * One round of email verification over a chosen slice of the registry.
+ * Scoped rather than all-or-nothing: verifying costs money per address, and an operator will
+ * reasonably want one state, or only the named contacts, before committing to the rest.
+ */
+model EmailVerificationBatch {
+  id     Int    @id @default(autoincrement())
+  name   String
+  /**
+   * PENDING -> EXPORTED -> APPLIED, or CANCELLED.
+   */
+  status String @default("PENDING")
+
+  /**
+   * The filter this batch was built from, kept so the scope is auditable after the fact.
+   */
+  scope Json
+
+  provider       String    @default("manual") // manual (CSV round-trip) | reoon
+  /**
+   * The provider's own task id, so a round can be polled and reconciled after a restart.
+   */
+  providerTaskId String?   @map("provider_task_id")
+  /**
+   * Progress as the provider last reported it.
+   */
+  providerStatus String?   @map("provider_status")
+  checkedCount   Int       @default(0) @map("checked_count")
+  /**
+   * What the provider said about the submission: duplicates removed, malformed rejected.
+   */
+  providerMeta   Json?     @map("provider_meta")
+  lastPolledAt   DateTime? @map("last_polled_at")
+  error          String?
+
+  total    Int @default(0)
+  valid    Int @default(0)
+  invalid  Int @default(0)
+  risky    Int @default(0)
+  catchAll Int @default(0) @map("catch_all")
+  unknown  Int @default(0)
+
+  createdById Int?      @map("created_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  exportedAt  DateTime? @map("exported_at")
+  appliedAt   DateTime? @map("applied_at")
+
+  items EmailVerificationItem[]
+
+  @@index([status])
+  @@map("email_verification_batch")
+}
+
+model EmailVerificationItem {
+  id      Int                    @id @default(autoincrement())
+  batchId Int                    @map("batch_id")
+  batch   EmailVerificationBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  pharmacyId Int      @map("pharmacy_id")
+  pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+
+  email  String
+  /**
+   * NOT_CHECKED until a result comes back: VALID | INVALID | RISKY | CATCH_ALL | UNKNOWN.
+   */
+  result String  @default("NOT_CHECKED")
+  detail String?
+  /**
+   * The provider's full record for this address, kept for disputes and re-mapping.
+   */
+  raw    Json?
+
+  @@unique([batchId, pharmacyId])
+  @@index([batchId, result])
+  @@map("email_verification_item")
+}
+
+model ImportJob {
+  id           Int     @id @default(autoincrement())
+  name         String
+  sourceType   String  @map("source_type") // STATE_BOARD | COMMERCIAL | MANUAL
+  jurisdiction String? // two-letter state, where the file is state-specific
+  datasetDate  String? @map("dataset_date") // YYYY-MM-DD as published by the source
+
+  // DECLARED -> UPLOADED -> ANALYSED -> COMMITTED (or CANCELLED at any point before commit)
+  status String @default("DECLARED")
+
+  /**
+   * Column headers the operator said the file has, in order.
+   */
+  declaredColumns Json @map("declared_columns")
+  /**
+   * canonical field -> declared column name. Email is mandatory; the UI will not proceed without it.
+   */
+  mapping         Json
+
+  fileName    String? @map("file_name")
+  fileFormat  String? @map("file_format") // csv | tsv | psv | xlsx
+  fileBytes   Int?    @map("file_bytes")
+  contentHash String? @map("content_hash") // sha256, so the same file is recognised on re-upload
+  storedPath  String? @map("stored_path") // the original file, kept for provenance
+
+  totalRows Int?  @map("total_rows")
+  /**
+   * Rule-by-rule counts and samples from the last analysis. Rebuilt whenever rules are re-run.
+   */
+  analysis  Json?
+
+  batchId Int?         @map("batch_id") // the ImportBatch created at commit
+  batch   ImportBatch? @relation(fields: [batchId], references: [id])
+
+  createdById Int?      @map("created_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  committedAt DateTime? @map("committed_at")
+
+  rows ImportRow[]
+
+  @@index([status])
+  @@map("import_job")
+}
+
+/**
+ * Every row of the uploaded file, exactly as read, alongside what preprocessing made of it.
+ * Keeping the raw payload next to the decision is what makes an import explainable: an operator
+ * asking "why was this pharmacy dropped?" gets the original row and the rule that removed it,
+ * rather than an aggregate count.
+ */
+model ImportRow {
+  id    Int       @id @default(autoincrement())
+  jobId Int       @map("job_id")
+  job   ImportJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  rowNumber Int   @map("row_number") // 1-based, matching the file with its header skipped
+  raw       Json // the source row, untouched
+  cleaned   Json? // canonical fields after normalisation
+
+  /**
+   * ACCEPTED | REVIEW | EXCLUDED
+   */
+  decision String  @default("ACCEPTED")
+  /**
+   * The rule that decided it, in the words the UI shows.
+   */
+  reason   String?
+  /**
+   * Non-fatal observations: a malformed email, a shared inbox, a missing phone.
+   */
+  notes    Json?
+
+  /**
+   * Set at commit, so a row can be traced to the master record it became.
+   */
+  pharmacyId Int? @map("pharmacy_id")
+
+  @@unique([jobId, rowNumber])
+  @@index([jobId, decision])
+  @@map("import_row")
+}
+
+model AppUser {
+  id           Int     @id @default(autoincrement())
+  email        String  @unique
+  name         String?
+  // scrypt, same format as the old env hash. Plaintext is never stored.
+  passwordHash String  @map("password_hash")
+  role         String  @default("VIEWER") // OWNER|ADMIN|MANAGER|AGENT|VIEWER
+  status       String  @default("ACTIVE") // ACTIVE|SUSPENDED
+
+  mustChangePassword Boolean   @default(false) @map("must_change_password")
+  lastLoginAt        DateTime? @map("last_login_at")
+  createdById        Int?      @map("created_by_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  conversations Conversation[] @relation("ConversationAssignee")
+  followUps     FollowUp[]     @relation("FollowUpAssignee")
+
+  @@index([role])
+  @@index([status])
+  @@map("app_user")
+}
+
+model AuditEvent {
+  id         Int      @id @default(autoincrement())
+  eventType  String   @map("event_type")
+  pharmacyId Int?     @map("pharmacy_id")
+  batchId    Int?     @map("batch_id")
+  taskId     Int?     @map("task_id")
+  actor      String   @default("system")
+  actorId    Int?     @map("actor_id")
+  actorRole  String?  @map("actor_role")
+  detail     String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([pharmacyId, createdAt])
+  @@map("audit_event")
+}
+
+/**
+ * One message in a campaign's sequence.
+ * A single email is one step. Everything after it is a follow-up that only goes out if the
+ * recipient has not answered - which is what a sequence is for and why every step records its
+ * own wait. Steps are ordered by stepNumber and nothing may skip ahead.
+ */
+model CampaignStep {
+  id         Int      @id @default(autoincrement())
+  campaignId Int      @map("campaign_id")
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  stepNumber Int @map("step_number")
+
+  /**
+   * Days to wait after the previous step was sent. Step 1 is always 0 - it goes when the
+   * campaign starts. A wait is counted from the send, not from the campaign start, so a
+   * queue that runs slowly does not compress the gaps.
+   */
+  waitDays Int @default(3) @map("wait_days")
+
+  /**
+   * Blank subject means "reply on the same thread", which is how a real follow-up reads.
+   */
+  subject  String?
+  bodyHtml String  @map("body_html")
+  bodyText String  @map("body_text")
+
+  /**
+   * A step can be turned off without deleting it and losing its history.
+   */
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([campaignId, stepNumber])
+  @@index([campaignId])
+  @@map("campaign_step")
+}
+
+/**
+ * Proof that one step went to one recipient.
+ * The recipient row carries only where things stand now. This is the record of what was
+ * actually sent, which is what an audit needs and what stops a retry sending step 2 twice.
+ */
+model CampaignRecipientStep {
+  id          Int               @id @default(autoincrement())
+  recipientId Int               @map("recipient_id")
+  recipient   CampaignRecipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  stepNumber        Int       @map("step_number")
+  sentAt            DateTime? @map("sent_at")
+  providerMessageId String?   @map("provider_message_id")
+  status            String    @default("SENT") // SENT|FAILED|SKIPPED
+  detail            String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([recipientId, stepNumber])
+  @@index([recipientId])
+  @@map("campaign_recipient_step")
+}
+
+/**
+ * A saved message, so the same wording does not get retyped and quietly drift.
+ * Used for campaign steps and for inbox replies. Personalisation tokens are the same ones the
+ * campaign composer accepts, and are rendered by lib/campaign/personalize.ts.
+ */
+model EmailTemplate {
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  /**
+   * CAMPAIGN for outbound steps, REPLY for answering somebody in the inbox.
+   */
+  kind     String  @default("REPLY")
+  subject  String?
+  bodyHtml String  @map("body_html")
+  bodyText String  @map("body_text")
+  /**
+   * Short note on when to reach for this one.
+   */
+  purpose  String?
+
+  timesUsed  Int       @default(0) @map("times_used")
+  lastUsedAt DateTime? @map("last_used_at")
+
+  createdBy String?  @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([kind])
+  @@map("email_template")
+}

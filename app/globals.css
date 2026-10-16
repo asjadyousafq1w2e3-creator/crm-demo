@@ -1,0 +1,252 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Material 3 palette, taken from the Stitch design reference (ui-examp).
+ *
+ * Light is defined on bare :root so it is always the complete fallback; dark is layered on twice -
+ * once for the system preference (unless the user chose light) and once for an explicit choice -
+ * so the toggle wins in both directions.
+ *
+ * Values are raw RGB channels so Tailwind's /opacity modifiers work against them.
+ *
+ * The sidebar has its own tokens rather than reusing "inverse surface": in light mode it is a dark
+ * navy panel, but in dark mode inverting it would make it white, which is not the intent.
+ */
+:root {
+  /* surfaces */
+  --bg: 250 248 255;                 /* surface            #faf8ff */
+  --panel: 255 255 255;              /* surface-container-lowest */
+  --raised: 242 243 255;             /* surface-container-low */
+  --sunken: 234 237 255;             /* surface-container */
+  --high: 226 231 255;               /* surface-container-high */
+  --line: 219 224 240;
+  --ink: 19 27 46;                   /* on-surface */
+  --muted: 74 85 104;                /* on-surface-variant */
+
+  /* key colours */
+  --accent: 0 104 95;                /* primary            #00685f */
+  --accent-ink: 255 255 255;         /* on-primary */
+  --accent-container: 0 131 120;     /* primary-container  #008378 */
+  --on-accent-container: 244 255 252;
+  --accent-soft: 137 245 231;        /* primary-fixed      #89f5e7 */
+
+  --info: 0 99 152;                  /* secondary          #006398 */
+  --info-container: 204 229 255;     /* secondary-fixed    #cce5ff */
+  --on-info-container: 0 71 110;
+
+  --neutral: 79 93 113;              /* tertiary           #4f5d71 */
+  --neutral-container: 213 227 252;  /* tertiary-fixed */
+
+  --ok: 15 122 90;
+  --ok-container: 200 240 224;
+  --warn: 154 91 0;
+  --warn-container: 255 231 197;
+  --bad: 186 26 26;                  /* error              #ba1a1a */
+  --bad-container: 255 218 214;      /* error-container */
+
+  /* sidebar */
+  --sidebar: 40 48 68;               /* inverse-surface    #283044 */
+  --sidebar-ink: 238 240 255;
+  --sidebar-muted: 185 199 223;      /* tertiary-fixed-dim */
+  --sidebar-active: 0 104 95;
+  --sidebar-active-ink: 255 255 255;
+
+  --shadow: 15 23 42;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: 17 19 24;
+    --panel: 29 32 36;
+    --raised: 25 28 32;
+    --sunken: 39 42 47;
+    --high: 50 53 58;
+    --line: 48 51 56;
+    --ink: 226 226 233;
+    --muted: 176 180 190;
+
+    --accent: 107 216 203;           /* inverse-primary    #6bd8cb */
+    --accent-ink: 0 56 47;
+    --accent-container: 0 80 73;     /* on-primary-fixed-variant #005049 */
+    --on-accent-container: 137 245 231;
+    --accent-soft: 0 80 73;
+
+    --info: 147 204 255;             /* secondary-fixed-dim #93ccff */
+    --info-container: 0 75 115;
+    --on-info-container: 204 229 255;
+
+    --neutral: 185 199 223;
+    --neutral-container: 58 72 91;
+
+    --ok: 95 212 168;
+    --ok-container: 0 66 48;
+    --warn: 253 182 78;
+    --warn-container: 84 51 0;
+    --bad: 255 180 171;
+    --bad-container: 147 0 10;
+
+    --sidebar: 12 14 19;
+    --sidebar-ink: 226 226 233;
+    --sidebar-muted: 142 145 143;
+    --sidebar-active: 0 80 73;
+    --sidebar-active-ink: 137 245 231;
+
+    --shadow: 0 0 0;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: 17 19 24;
+  --panel: 29 32 36;
+  --raised: 25 28 32;
+  --sunken: 39 42 47;
+  --high: 50 53 58;
+  --line: 48 51 56;
+  --ink: 226 226 233;
+  --muted: 176 180 190;
+
+  --accent: 107 216 203;
+  --accent-ink: 0 56 47;
+  --accent-container: 0 80 73;
+  --on-accent-container: 137 245 231;
+  --accent-soft: 0 80 73;
+
+  --info: 147 204 255;
+  --info-container: 0 75 115;
+  --on-info-container: 204 229 255;
+
+  --neutral: 185 199 223;
+  --neutral-container: 58 72 91;
+
+  --ok: 95 212 168;
+  --ok-container: 0 66 48;
+  --warn: 253 182 78;
+  --warn-container: 84 51 0;
+  --bad: 255 180 171;
+  --bad-container: 147 0 10;
+
+  --sidebar: 12 14 19;
+  --sidebar-ink: 226 226 233;
+  --sidebar-muted: 142 145 143;
+  --sidebar-active: 0 80 73;
+  --sidebar-active-ink: 137 245 231;
+
+  --shadow: 0 0 0;
+  color-scheme: dark;
+}
+
+* { border-color: rgb(var(--line)); }
+
+body {
+  @apply bg-bg text-ink antialiased;
+  font-feature-settings: "tnum" 1, "cv05" 1;
+}
+
+/* ---------------------------------------------------------------- type scale */
+.t-display  { @apply text-[2rem] leading-[2.5rem] font-bold tracking-[-0.025em]; }
+.t-head     { @apply text-[1.5rem] leading-8 font-semibold tracking-[-0.02em]; }
+.t-title    { @apply text-[1.125rem] leading-6 font-semibold tracking-[-0.01em]; }
+.t-body     { @apply text-[0.875rem] leading-5; }
+.t-small    { @apply text-[0.75rem] leading-4 tracking-[0.01em]; }
+.t-label    { @apply text-[0.6875rem] leading-[0.875rem] font-semibold tracking-[0.02em] uppercase; }
+.t-colhead  { @apply text-[0.6875rem] leading-4 font-semibold tracking-[0.05em] uppercase; }
+.t-mono     { @apply text-[0.8125rem] leading-[1.125rem] font-medium tracking-[-0.01em]
+                     font-mono tabular-nums; }
+
+/* ---------------------------------------------------------------- surfaces */
+.card { @apply bg-panel rounded-xl shadow-card border border-line/70; }
+.card-hd { @apply flex items-center justify-between gap-3 px-4 py-3 border-b border-line/70; }
+.card-title { @apply text-[0.875rem] font-semibold tracking-tight; }
+.card-sub { @apply t-small text-muted; }
+
+/* A section label above a group of cards, as on the reference dashboard. */
+.section-label { @apply flex items-center gap-2 t-colhead text-muted; }
+
+/* ---------------------------------------------------------------- table */
+.tbl { @apply w-full text-[0.875rem] border-collapse; }
+.tbl th { @apply text-left t-colhead text-muted px-4 py-2.5 whitespace-nowrap
+          bg-raised border-b border-line sticky top-0 z-10; }
+.tbl td { @apply px-4 py-2.5 border-b border-line/60 align-middle; }
+.tbl tbody tr:last-child td { @apply border-b-0; }
+.tbl tbody tr { @apply transition-colors; }
+.tbl tbody tr:hover { @apply bg-accent/[0.045]; }
+
+/* ---------------------------------------------------------------- badges */
+.badge { @apply inline-flex items-center gap-1 rounded-lg px-2 py-[3px] t-label whitespace-nowrap; }
+.tone-ok      { @apply bg-ok-container text-ok; }
+.tone-warn    { @apply bg-warn-container text-warn; }
+.tone-bad     { @apply bg-bad-container text-bad; }
+.tone-info    { @apply bg-info-container text-on-info-container; }
+.tone-neutral { @apply bg-sunken text-muted; }
+.tone-accent  { @apply bg-accent/[0.12] text-accent; }
+
+/* ---------------------------------------------------------------- controls */
+.input, .inp {
+  @apply bg-bg border border-line rounded-lg px-3 py-[7px] text-[0.875rem] text-ink
+         placeholder:text-muted/80 transition-all
+         focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20;
+}
+.input { @apply w-full; }
+select.inp, select.input { @apply pr-7; }
+
+.btn {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-raised
+         px-3 py-[7px] text-[0.875rem] font-medium text-ink transition-all shadow-sm
+         hover:bg-sunken hover:border-line
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30
+         disabled:opacity-45 disabled:pointer-events-none;
+}
+.btn-primary {
+  @apply bg-accent text-accent-ink border-accent shadow-sm
+         hover:bg-accent-container hover:border-accent-container active:scale-[0.99];
+}
+.btn-danger { @apply text-bad border-bad/35 bg-bad-container/40 hover:bg-bad-container; }
+.btn-ghost  { @apply border-transparent bg-transparent shadow-none hover:bg-accent/[0.07]; }
+.btn-sm     { @apply px-2.5 py-1 text-[0.8125rem]; }
+
+/* ---------------------------------------------------------------- sidebar */
+.nav-link {
+  @apply flex items-center gap-3 px-3 py-2 rounded-lg t-body text-sidebar-muted
+         transition-colors hover:bg-white/[0.07] hover:text-sidebar-ink;
+}
+.nav-link[data-active="true"] {
+  @apply bg-sidebar-active text-sidebar-active-ink font-semibold;
+}
+.nav-group { @apply px-3 pb-1.5 t-colhead text-sidebar-muted/70; }
+.nav-sub {
+  @apply flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[0.8125rem]
+         text-sidebar-muted transition-colors hover:bg-white/[0.07] hover:text-sidebar-ink;
+}
+.nav-sub[data-active="true"] { @apply text-sidebar-ink font-semibold bg-white/[0.07]; }
+
+/* ---------------------------------------------------------------- misc */
+.kpi-value { @apply t-display tabular-nums; }
+.hairline  { @apply border-t border-line/70; }
+.link      { @apply text-accent hover:underline underline-offset-2 font-medium; }
+
+/* Material Symbols, sized to sit on the text baseline. */
+.msi {
+  font-family: var(--font-symbols), "Material Symbols Outlined", sans-serif;
+  font-weight: normal; font-style: normal; line-height: 1;
+  letter-spacing: normal; text-transform: none; white-space: nowrap;
+  direction: ltr; -webkit-font-feature-settings: "liga"; font-variation-settings: "opsz" 20;
+  -webkit-font-smoothing: antialiased; user-select: none;
+}
+
+input[type="checkbox"], input[type="radio"] { @apply accent-[rgb(var(--accent))] cursor-pointer; }
+
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  @apply outline-none ring-2 ring-accent/35 rounded-lg;
+}
+
+::selection { background: rgb(var(--accent) / 0.2); }
+
+* { scrollbar-color: rgb(var(--line)) transparent; scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { @apply bg-line rounded-full border-[3px] border-solid border-transparent bg-clip-content; }
+*::-webkit-scrollbar-thumb:hover { @apply bg-muted/50 bg-clip-content; }
+*::-webkit-scrollbar-track { background: transparent; }

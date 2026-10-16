@@ -1,0 +1,53 @@
+{
+  "name": "pharmacy-outreach-crm",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint app lib worker components tests",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "import:sqlite": "tsx scripts/import-from-sqlite.ts",
+    "import:filtered": "tsx scripts/replace-pharmacies-from-csv.ts",
+    "hash:password": "tsx scripts/hash-password.ts",
+    "test": "tsx tests/unit.test.mts && tsx tests/import.test.mts",
+    "test:db": "tsx tests/integration.test.mts",
+    "worker": "tsx worker/index.ts",
+    "worker:once": "tsx worker/index.ts --once",
+    "icons:subset": "bash scripts/subset-icons.sh",
+    "test:import": "tsx tests/import.test.mts",
+    "check:migrations": "tsx scripts/check-migrations.mts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.0",
+    "exceljs": "^4.4.0",
+    "googleapis": "^144.0.0",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "better-sqlite3": "^11.8.1",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "^15.1.6",
+    "postcss": "^8.5.1",
+    "prisma": "^6.3.0",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
