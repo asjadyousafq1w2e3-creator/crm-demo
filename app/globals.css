@@ -256,3 +256,70 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .crm-demo-compact [data-ui="guidance"],
 .crm-demo-compact .crm-demo-guide,
 .crm-demo-compact .card-sub { display: none; }
+
+/* Updated demo workspace. The original operational CRM retains its existing chrome. */
+:root[data-theme="light"] .crm-demo-compact {
+  --bg: 246 248 249;
+  --raised: 245 247 248;
+  --sunken: 236 241 242;
+  --high: 234 241 239;
+  --line: 226 232 235;
+  --ink: 29 42 47;
+  --muted: 100 113 121;
+  --sidebar: 19 43 40;
+  --sidebar-ink: 236 245 241;
+  --sidebar-muted: 163 187 179;
+  --sidebar-active: 35 76 65;
+  --sidebar-active-ink: 244 255 250;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .crm-demo-compact {
+    --bg: 246 248 249; --raised: 245 247 248; --sunken: 236 241 242;
+    --high: 234 241 239; --line: 226 232 235; --ink: 29 42 47; --muted: 100 113 121;
+    --sidebar: 19 43 40; --sidebar-ink: 236 245 241; --sidebar-muted: 163 187 179;
+    --sidebar-active: 35 76 65; --sidebar-active-ink: 244 255 250;
+  }
+}
+.crm-demo-compact { background: rgb(var(--bg)); }
+.crm-demo-compact .crm-mode-banner { display: none; }
+.crm-demo-compact .crm-sidebar { top: 0; width: 240px; }
+.crm-demo-compact .crm-sidebar > div:first-child { padding: 25px 20px 22px; }
+.crm-demo-compact .crm-sidebar .t-title { font-size: 16px; letter-spacing: -.45px; font-weight: 600; }
+.crm-demo-compact .crm-sidebar .nav-group { font-size: 9px; letter-spacing: .1em; padding-bottom: 10px; }
+.crm-demo-compact .crm-sidebar .nav-link { font-size: 12px; padding-top: 10px; padding-bottom: 10px; gap: 11px; }
+.crm-demo-compact .crm-sidebar .nav-link .msi { opacity: .8; }
+.crm-demo-compact .crm-sidebar .nav-sub { font-size: 11px; }
+.crm-demo-compact .crm-shell { padding-left: 240px; padding-top: 0; }
+.crm-demo-compact .crm-topbar { top: 0; left: 240px; height: 64px; padding-left: 30px; padding-right: 30px; background: rgb(var(--panel)); backdrop-filter: none; }
+.crm-demo-compact .crm-topbar > form { background: transparent; border-color: transparent; box-shadow: none; padding-left: 0; max-width: 420px; }
+.crm-demo-compact .crm-topbar input { font-size: 12px; }
+.crm-demo-compact .crm-main { padding-top: 64px; min-height: 100vh; }
+.crm-demo-compact .crm-content { padding: 27px 30px; max-width: 1600px; }
+.crm-demo-badge { display: inline-flex; align-items: center; gap: 6px; color: rgb(var(--muted)); border: 1px solid rgb(var(--line)); border-radius: 5px; padding: 5px 8px; font-size: 10px; white-space: nowrap; }
+.crm-demo-badge > span { width: 5px; height: 5px; border-radius: 50%; background: rgb(var(--accent)); }
+.crm-inbox-link { position: relative; color: rgb(var(--muted)); display: flex; padding: 5px; }
+.crm-inbox-link > span:last-child:not(.msi) { position: absolute; width: 5px; height: 5px; border-radius: 50%; right: 5px; top: 5px; background: rgb(var(--accent)); border: 1px solid rgb(var(--panel)); }
+.crm-menu-button { display: none; }
+.crm-menu-backdrop { position: fixed; inset: 0; background: rgb(10 24 23 / .5); z-index: 35; backdrop-filter: blur(2px); }
+.crm-sidebar-close { display: none; }
+@media (max-width: 1200px) {
+  .crm-demo-compact .crm-content { padding: 23px; }
+  .crm-demo-compact .crm-topbar { padding-left: 23px; padding-right: 23px; }
+}
+@media (max-width: 767px) {
+  .crm-demo-compact .crm-sidebar { width: 260px; transform: translateX(-100%); transition: transform .2s ease; z-index: 40; }
+  .crm-demo-compact[data-menu-open="true"] .crm-sidebar { transform: translateX(0); }
+  .crm-demo-compact .crm-shell { padding-left: 0; }
+  .crm-demo-compact .crm-topbar { left: 0; padding: 0 16px; gap: 12px; height: 58px; }
+  .crm-demo-compact .crm-main { padding-top: 58px; }
+  .crm-demo-compact .crm-content { padding: 22px 16px; }
+  .crm-demo-compact .crm-topbar > form { min-width: 0; padding-left: 0; }
+  .crm-demo-compact .crm-topbar > form input { font-size: 11px; }
+  .crm-demo-compact .crm-topbar > div:last-child { gap: 9px; }
+  .crm-demo-badge { display: none; }
+  .crm-menu-button { display: inline-flex; padding: 5px 0; align-items: center; justify-content: center; color: rgb(var(--ink)); flex-shrink: 0; }
+  .crm-sidebar-close { position: absolute; top: 7px; right: 7px; display: flex; color: rgb(var(--sidebar-muted)); padding: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .crm-demo-compact .crm-sidebar { transition: none; }
+}

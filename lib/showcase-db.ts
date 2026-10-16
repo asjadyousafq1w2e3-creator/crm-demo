@@ -93,7 +93,8 @@ for (let i = 0; i < 6; i++) add("FollowUp", { pharmacyId: i + 1, conversationId:
 add("EmailVerificationBatch", { name: "Verification round", status: "EXPORTED", scope: {}, provider: "DEMO", total: 0, checkedCount: 0, valid: 0, invalid: 0, risky: 0, catchAll: 0, unknown: 0, createdById: 1, exportedAt: ago(1) });
 add("ImportJob", { name: "Original pharmacy registry", sourceType: "MANUAL", jurisdiction: "US", datasetDate: snapshotDate, status: "COMMITTED", declaredColumns: Object.values(importMapping), mapping: importMapping, fileName: "original_pharmacies.json", fileFormat: "JSON", fileBytes: Buffer.byteLength(JSON.stringify(registry)), totalRows: pharmacyCount, analysis: { accepted: pharmacyCount, review: 0, excluded: 0, totalRows: pharmacyCount, withEmail: registry.records.filter(p => p.email).length, withPhone: registry.records.filter(p => p.phone).length, sharedInboxes: registry.records.filter(p => p.emailKind === "SHARED").length, duplicates: 0, ruleCounts: {}, byState }, batchId: 1, createdById: 1, committedAt: snapshotDate });
 data.Pharmacy.forEach((p, i) => add("ImportRow", { jobId: 1, rowNumber: i + 1, raw: importValues(p), cleaned: { ...importValues(p), name: p.canonicalName }, decision: "ACCEPTED", notes: [], pharmacyId: p.id }));
-for (let i = 0; i < 14; i++) add("AuditEvent", { eventType: ["IMPORT_COMPLETED", "VERIFICATION_RECORDED", "CAMPAIGN_CREATED", "FOLLOW_UP_CREATED"][i % 4], pharmacyId: i + 1, actor: "Jamie Demo", actorId: 1, actorRole: "OWNER", detail: null, createdAt: ago(i) });
+const sampleActivityDays = [0, 0, 0, 1, 1, 2, 3, 3, 5, 5, 5, 7, 9, 12];
+for (let i = 0; i < 14; i++) add("AuditEvent", { eventType: ["IMPORT_COMPLETED", "VERIFICATION_RECORDED", "CAMPAIGN_CREATED", "FOLLOW_UP_CREATED"][i % 4], pharmacyId: i + 1, actor: "Jamie Demo", actorId: 1, actorRole: "OWNER", detail: null, createdAt: ago(sampleActivityDays[i]) });
 add("SuppressionEntry", { email: "do-not-contact@expressdiabetics.example", reason: "UNSUBSCRIBED", source: "DEMO", notes: "Fictional sample suppression entry." });
 add("EmailTemplate", { name: "A friendly pharmacy introduction", kind: "INTRODUCTION", subject: "A new connection for {{pharmacy_name}}", bodyText: "Hello {{owner_name}},\n\nWe’d love to learn more about your pharmacy.\n\nexpressdiabetics", bodyHtml: "<p>A sample pharmacy introduction.</p>", purpose: "Fictional sample template", timesUsed: 2, createdBy: "Jamie Demo" });
 
@@ -230,9 +231,19 @@ export function createShowcaseClient() {
       ...Object.fromEntries(["create", "createMany", "update", "updateMany", "upsert", "delete", "deleteMany"].map(method => [method, async () => { throw new Error("Display-only demo: saving and live operations are disabled."); }])),
     };
   }
-  client.$queryRaw = async (strings: TemplateStringsArray) => {
+  client.$queryRaw = async (strings: TemplateStringsArray, ...values: unknown[]) => {
     const sql = strings.join(" ");
-    if (sql.includes("audit_event")) return Array.from({ length: 14 }, (_, i) => ({ day: ago(i).toISOString().slice(0, 10), n: BigInt(i % 4 + 1) }));
+    if (sql.includes("audit_event")) {
+      const since = values.find(value => value instanceof Date) as Date | undefined;
+      const counts = new Map<string, bigint>();
+      for (const event of data.AuditEvent) {
+        const createdAt = event.createdAt as Date;
+        if (since && createdAt < since) continue;
+        const day = createdAt.toISOString().slice(0, 10);
+        counts.set(day, (counts.get(day) || BigInt(0)) + BigInt(1));
+      }
+      return [...counts].sort(([a], [b]) => a.localeCompare(b)).map(([day, n]) => ({ day, n }));
+    }
     if (/SELECT\s+1\b/i.test(sql)) return [{ "?column?": 1 }];
     throw new Error("Display-only demo: SQL operations are disabled.");
   };

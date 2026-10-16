@@ -12,6 +12,7 @@ import { Icon, type IconName } from "@/components/icon";
 import { crmHomePath } from "@/lib/showcase-links";
 import { isCrmShowcase } from "@/lib/showcase-mode";
 import { ReadonlyNotice } from "@/components/showcase/readonly-notice";
+import { WorkspaceMenu } from "@/components/dashboard/workspace-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -104,7 +105,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
 
   const groups: NavGroup[] = NAV
     .map((g) => ({
-      group: g.group,
+      group: isCrmShowcase() && g.group === "Work" ? "Workspace" : g.group,
       items: g.items.flatMap((i) => {
         const children = (i.children ?? [])
           .filter((c) => can(session.role, c.need))
@@ -119,7 +120,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
           return [{ href: head.href, label: head.label, icon: i.icon, badge: head.badge,
                     children: rest }];
         }
-        return [{ href: i.href === "/" ? home : i.href, label: i.label, icon: i.icon, badge: badges[i.href], children }];
+        return [{ href: i.href === "/" ? home : i.href, label: isCrmShowcase() && i.href === "/" ? "Dashboard" : i.label, icon: i.href === "/" ? "dashboard" : i.icon, badge: badges[i.href], children }];
       }),
     }))
     .filter((g) => g.items.length > 0);
@@ -131,7 +132,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
     <div className={isCrmShowcase() ? "min-h-screen crm-demo-compact" : "min-h-screen"}>
       {isCrmShowcase() && <ReadonlyNotice />}
       {/* Sending mode, across the top of every screen, so it is never a surprise. */}
-      <div className={`fixed top-0 inset-x-0 z-50 h-banner flex items-center justify-between
+      <div className={`crm-mode-banner fixed top-0 inset-x-0 z-50 h-banner flex items-center justify-between
         px-4 t-label ${live ? "bg-bad-container text-bad" : "bg-high text-ink"}`}>
         <span className="flex items-center gap-2 truncate">
           <span className={`w-1.5 h-1.5 rounded-full ${live ? "bg-bad" : "bg-accent"} animate-pulse`} />
@@ -150,7 +151,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Sidebar */}
-      <aside className="fixed left-0 top-banner bottom-0 w-sidebar z-40 bg-sidebar
+      <aside id="crm-sidebar" aria-label="Workspace navigation" className="crm-sidebar fixed left-0 top-banner bottom-0 w-sidebar z-40 bg-sidebar
         text-sidebar-ink flex flex-col border-r border-white/[0.06]">
         <div className="px-4 py-3.5">
           <Link href={home} className="flex items-center gap-2.5">
@@ -163,7 +164,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
                 {isCrmShowcase() ? "expressdiabetics" : "Verified Pharmacy"}
               </span>
               <span className="block text-[0.6875rem] text-sidebar-muted leading-tight">
-                Outreach CRM
+                {isCrmShowcase() ? "Pharmacy workspace" : "Outreach CRM"}
               </span>
             </span>
           </Link>
@@ -201,11 +202,13 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Header + content */}
-      <div className="pl-sidebar pt-banner">
-        <header className="fixed top-banner left-sidebar right-0 h-header z-30 bg-panel/90
+      <div className="crm-shell pl-sidebar pt-banner">
+        <header className="crm-topbar fixed top-banner left-sidebar right-0 h-header z-30 bg-panel/90
           backdrop-blur-xl border-b border-line flex items-center justify-between gap-4 px-5">
+          {isCrmShowcase() && <WorkspaceMenu />}
           <GlobalSearch />
           <div className="flex items-center gap-3 shrink-0">
+            {isCrmShowcase() && <><span className="crm-demo-badge"><span />Demo workspace</span><Link href="/inbox" aria-label={`Inbox, ${unread} unread conversations`} className="crm-inbox-link"><Icon name="notifications_active" size={19} />{unread > 0 && <span />}</Link></>}
             <span className="crm-demo-guide hidden lg:flex items-center gap-2 bg-raised border border-line
               rounded-lg px-2.5 py-1">
               <span className="t-label text-muted">Mode</span>
@@ -221,8 +224,8 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        <main className="pt-header min-h-[calc(100vh-1.75rem)]">
-          <div className="px-6 py-5 max-w-[1600px] space-y-5">{children}</div>
+        <main className="crm-main pt-header min-h-[calc(100vh-1.75rem)]">
+          <div className="crm-content px-6 py-5 max-w-[1600px] space-y-5">{children}</div>
         </main>
       </div>
     </div>

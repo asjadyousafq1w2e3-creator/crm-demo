@@ -19,6 +19,7 @@ export function GlobalSearch() {
                  focus-within:ring-accent/20 transition-all">
       <Icon name="search" size={18} className="text-muted" />
       <input value={q} onChange={(e) => setQ(e.target.value)}
+        aria-label="Search pharmacy records"
         placeholder="Search name, licence, NPI, email, city…"
         className="bg-transparent border-none outline-none t-body text-ink w-full
                    placeholder:text-muted/80" />

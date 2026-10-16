@@ -10,6 +10,7 @@ import Link from "next/link";
 import { PipelineBoard } from "@/components/pipeline";
 import { footerCompliance, footerProblem } from "@/lib/settings";
 import { isCrmShowcase } from "@/lib/showcase-mode";
+import { DashboardOverview } from "@/components/dashboard/overview";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ const ELIGIBLE_WHERE: Prisma.PharmacyWhereInput = {
   emailVerificationStatus: "VALID",
 };
 
-const DAYS = 14;
+const DAYS = isCrmShowcase() ? 30 : 14;
 
 export default async function Dashboard() {
   // Viewing is gated as well as acting: a role without this permission
@@ -81,7 +82,7 @@ export default async function Dashboard() {
 
   // --- activity: real audit rows per day, nothing interpolated ---------------------------------
   const since = new Date(Date.now() - (DAYS - 1) * 864e5);
-  since.setHours(0, 0, 0, 0);
+  since.setUTCHours(0, 0, 0, 0);
   const activityRows = await prisma.$queryRaw<{ day: string; n: bigint }[]>`
     SELECT to_char(created_at, 'YYYY-MM-DD') AS day, count(*) AS n
     FROM audit_event WHERE created_at >= ${since} GROUP BY 1 ORDER BY 1`;
@@ -90,7 +91,27 @@ export default async function Dashboard() {
     const d = new Date(since.getTime() + i * 864e5).toISOString().slice(0, 10);
     return { day: d, n: byDay.get(d) ?? 0 };
   });
-  const recent = await prisma.auditEvent.findMany({ orderBy: { id: "desc" }, take: 8 });
+  const recent = await prisma.auditEvent.findMany({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 8 });
+
+  if (isCrmShowcase()) {
+    const pharmacies = await prisma.pharmacy.findMany({
+      orderBy: { id: "asc" }, take: 5,
+      select: { id: true, canonicalName: true, city: true, state: true, email: true, phone: true, verificationStatus: true },
+    });
+    return <DashboardOverview
+      name={session?.name || "there"} total={total} withEmail={withEmail} withPhone={withPhone}
+      withWebsite={withWebsite} withOwner={withOwner} verified={v("VERIFIED")}
+      ready={v("READY_FOR_VERIFICATION")} inVerification={v("IN_VERIFICATION")}
+      needsReview={v("NEEDS_REVIEW")} excluded={v("EXCLUDED")} eligible={eligibleNow}
+      stateCount={states.filter(state => state.state).length}
+      tasks={task("NOT_STARTED") + task("IN_PROGRESS") + task("BLOCKED")}
+      campaigns={campaignsRunning} accepted={accepted} replies={r("REPLIED")}
+      unread={unread} followUps={followUpsDue} capacity={capacity} connected={connected}
+      showOutreach={showOutreach} canCreateCampaign={can(session?.role, "campaign.edit")}
+      byState={byState.filter(state => state.state).map(state => ({ state: state.state!, count: state._count })).sort((a, b) => b.count - a.count || a.state.localeCompare(b.state))}
+      activity={activity} recent={recent} pharmacies={pharmacies} batch={batch}
+    />;
+  }
 
   return (
     <>

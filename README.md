@@ -49,6 +49,10 @@ Password: ExpressDiabetics2026!
 
 See [VERCEL_DEPLOY.md](VERCEL_DEPLOY.md) for optional main-domain and CRM-subdomain setup.
 
+The redesigned dashboard includes interactive activity charts, linked metrics, contact coverage,
+original pharmacy previews and mobile navigation. See [DASHBOARD_IMPROVEMENTS.md](DASHBOARD_IMPROVEMENTS.md)
+for the complete list of improvements and validation details.
+
 Light mode is the default. Page subtitles, onboarding steps, and supplementary guides are hidden
 in the CRM demo. The owner has approved publishing the pharmacy records, including available
 business contacts, addresses, identifiers, notes and recorded statuses. Original user accounts,
