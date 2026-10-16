@@ -95,7 +95,7 @@ export default async function ImportJobPage({ params, searchParams }: {
               <Icon name="upload_file" size={16} /> Upload
             </button>
           </form>
-          <p className="t-small text-muted mt-3 pt-3 hairline leading-relaxed">
+          <p data-ui="description" className="t-small text-muted mt-3 pt-3 hairline leading-relaxed">
             Nothing reaches the registry at this point. The file is read, checked against the
             columns you declared, and kept for provenance.
           </p>
@@ -178,7 +178,7 @@ export default async function ImportJobPage({ params, searchParams }: {
               <Icon name="tune" size={16} /> Clean and filter the file
             </button>
           </form>
-          <p className="t-small text-muted mt-3 leading-relaxed">
+          <p data-ui="description" className="t-small text-muted mt-3 leading-relaxed">
             Normalises every field, then applies the same rules the rest of the registry went
             through. Still nothing is written — you see the result first, rule by rule, and can
             re-run it as often as you like.
@@ -309,7 +309,7 @@ export default async function ImportJobPage({ params, searchParams }: {
                   {analysis.excluded.toLocaleString()} excluded rows are not written, and stay here
                   with their reasons.
                 </p>
-                <p className="t-small text-muted leading-relaxed">
+                <p data-ui="description" className="t-small text-muted leading-relaxed">
                   A row matching a pharmacy you already hold — same state licence, same NPI, or the
                   same name at the same ZIP — updates that record rather than creating a second one.
                   {job.sourceType === "STATE_BOARD"

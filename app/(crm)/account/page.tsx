@@ -42,7 +42,7 @@ export default async function Account({ searchParams }: {
             <Row label="Account created"
               value={user?.createdAt.toISOString().slice(0, 10) ?? "—"} />
           </div>
-          <p className="text-[11px] text-muted mt-3 pt-3 hairline leading-relaxed">
+          <p data-ui="description" className="text-[11px] text-muted mt-3 pt-3 hairline leading-relaxed">
             {ROLE_DESCRIPTION[session.role]}
           </p>
         </Card>

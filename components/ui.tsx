@@ -104,7 +104,7 @@ export function PageHeader({ title, subtitle, actions, children }: {
       <div className="flex flex-wrap items-start justify-between gap-3 max-w-[1600px]">
         <div className="min-w-0">
           <h1 className="t-head">{title}</h1>
-          {subtitle && <p className="t-body text-muted mt-1 max-w-3xl">{subtitle}</p>}
+          {subtitle && <p data-ui="description" className="t-body text-muted mt-1 max-w-3xl">{subtitle}</p>}
           {children}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
@@ -123,7 +123,7 @@ export function Card({ title, subtitle, actions, children, className = "", pad =
         <header className="card-hd">
           <div className="min-w-0">
             {title && <h2 className="card-title truncate">{title}</h2>}
-            {subtitle && <p className="card-sub mt-0.5">{subtitle}</p>}
+            {subtitle && <p data-ui="description" className="card-sub mt-0.5">{subtitle}</p>}
           </div>
           {actions && <div className="flex items-center gap-1.5 shrink-0">{actions}</div>}
         </header>
@@ -148,7 +148,7 @@ export function Stat({ label, value, hint, tone, href, icon }: {
       <div className={`kpi-value mt-1.5 ${tone ? TEXT[tone] : ""}`}>
         {typeof value === "number" ? value.toLocaleString() : value}
       </div>
-      {hint && <div className="t-small text-muted mt-1 leading-snug">{hint}</div>}
+      {hint && <div data-ui="description" className="t-small text-muted mt-1 leading-snug">{hint}</div>}
     </>
   );
   const cls = "card px-4 py-3.5 block transition-all";
@@ -175,7 +175,7 @@ export function Note({ tone = "info", children }: {
     neutral: "border-line bg-raised",
   };
   return (
-    <div className={`rounded-card border px-3 py-2 text-[12px] leading-relaxed ${ring[tone]}`}>
+    <div data-ui={tone === "info" || tone === "neutral" ? "guidance" : undefined} className={`rounded-card border px-3 py-2 text-[12px] leading-relaxed ${ring[tone]}`}>
       {children}
     </div>
   );

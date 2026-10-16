@@ -64,7 +64,7 @@ export default async function NewImport({ searchParams }: {
               <input name="datasetDate" type="date" className="input" />
             </label>
           </div>
-          <p className="t-small text-muted mt-3 pt-3 hairline leading-relaxed">
+          <p data-ui="description" className="t-small text-muted mt-3 pt-3 hairline leading-relaxed">
             Source type decides what happens on a match. A state board may correct a value the
             registry already holds; a commercial or manual file may only fill a gap, never
             overwrite what a board supplied.

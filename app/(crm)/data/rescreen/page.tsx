@@ -95,7 +95,7 @@ export default async function Rescreen({ searchParams }: {
                 <button className="btn btn-danger">
                   <Icon name="rule" size={16} /> Apply to the registry
                 </button>
-                <p className="t-small text-muted leading-relaxed">
+                <p data-ui="description" className="t-small text-muted leading-relaxed">
                   Every change is audited, and every excluded record keeps its exclusion reason, so
                   a wrong call can be found and reversed.
                 </p>

@@ -112,14 +112,14 @@ export default async function PharmacyDetail({ params }: { params: Promise<{ id:
             {p.assignedMailbox ? (
               <>
                 <div className="font-medium">{p.assignedMailbox.emailAddress}</div>
-                <p className="text-[11px] text-muted mt-0.5 leading-relaxed">
+                <p data-ui="description" className="text-[11px] text-muted mt-0.5 leading-relaxed">
                   This pharmacy hears from this address. Later campaigns reuse it, and replies are
                   answered from it — unless it becomes unusable, in which case the reroute is
                   written to the audit log.
                 </p>
               </>
             ) : (
-              <p className="text-[11px] text-muted leading-relaxed">
+              <p data-ui="description" className="text-[11px] text-muted leading-relaxed">
                 Not yet assigned. The first successful send records which mailbox owns this
                 relationship, and every later message uses the same one.
               </p>

@@ -168,7 +168,7 @@ export function Meter({ label, value, total, tone = "accent", caption }: {
       <div className="h-2 rounded-full bg-line/70 overflow-hidden mt-1.5">
         <div className="h-full rounded-full" style={{ width: `${p}%`, background: FILL[tone] }} />
       </div>
-      {caption && <div className="text-[10px] text-muted mt-1">{caption}</div>}
+      {caption && <div data-ui="description" className="text-[10px] text-muted mt-1">{caption}</div>}
     </div>
   );
 }

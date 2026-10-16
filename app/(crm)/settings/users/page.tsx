@@ -148,7 +148,7 @@ export default async function Users({ searchParams }: {
                     {ROLE_PERMISSIONS[r].length} of {PERMISSIONS.length} permissions
                   </span>
                 </div>
-                <p className="text-[11px] text-muted mt-1 leading-relaxed">{ROLE_DESCRIPTION[r]}</p>
+                <p data-ui="description" className="text-[11px] text-muted mt-1 leading-relaxed">{ROLE_DESCRIPTION[r]}</p>
               </div>
             ))}
           </div>

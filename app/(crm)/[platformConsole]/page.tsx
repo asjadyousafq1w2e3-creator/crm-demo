@@ -62,7 +62,7 @@ export default async function PlatformConsole({ params, searchParams }: {
           subtitle="Operators can sign in again and the worker picks up where it left off">
           <div className="space-y-3">
             {state.reason && <Row label="Reason given" value={state.reason} />}
-            <p className="t-small text-muted leading-relaxed">
+            <p data-ui="description" className="t-small text-muted leading-relaxed">
               Nothing was lost while suspended. Queued recipients stayed queued, claimed sends were
               returned to the queue by the usual recovery, and no message left the application.
             </p>
@@ -84,7 +84,7 @@ export default async function PlatformConsole({ params, searchParams }: {
               <input name="reason" required className="input"
                 placeholder="e.g. billing on hold, or investigating a deliverability problem" />
             </label>
-            <p className="t-small text-muted leading-relaxed">
+            <p data-ui="description" className="t-small text-muted leading-relaxed">
               Every operator, including owners, is signed out and cannot sign back in. The worker
               stops sending and syncing on its next tick. Messages already handed to the provider
               cannot be recalled — everything still queued simply stays queued.

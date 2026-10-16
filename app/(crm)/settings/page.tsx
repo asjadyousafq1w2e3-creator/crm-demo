@@ -31,7 +31,7 @@ export default async function Settings() {
       <PageHeader title="Settings"
         subtitle="Company identity is editable here. Anything that controls whether email can leave the application is environment-only and read-only in the UI by design." />
 
-      <Card title="Readiness"
+      <Card className="crm-demo-guide" title="Readiness"
         subtitle={ready.canSendToRealPharmacies
           ? "Everything that has to be true before real outreach is true"
           : "What still stands between this deployment and contacting a real pharmacy"}>
@@ -58,7 +58,7 @@ export default async function Settings() {
             </li>
           ))}
         </ul>
-        <p className="t-small text-muted mt-3 pt-3 hairline leading-relaxed">
+        <p data-ui="description" className="t-small text-muted mt-3 pt-3 hairline leading-relaxed">
           Credentials are only part of it. A deployment with perfect environment variables and no
           verified records still cannot send to anybody, so those steps are listed here rather than
           treated as someone else&apos;s problem.
@@ -66,7 +66,7 @@ export default async function Settings() {
       </Card>
 
       {problems.length > 0 && (
-        <Card title="Configuration notes"
+        <Card className="crm-demo-guide" title="Configuration notes"
           subtitle="Read from the environment at startup; the health endpoint reports the same list">
           <ul className="space-y-1.5">
             {problems.map((p) => (
@@ -117,7 +117,7 @@ export default async function Settings() {
               v={config.liveTestAllowlist.length
                 ? config.liveTestAllowlist.join(", ")
                 : "empty — in live mode every address is refused"} />
-            <p className="text-[11px] text-muted pt-2 mt-2 hairline leading-relaxed">
+            <p data-ui="description" className="text-[11px] text-muted pt-2 mt-2 hairline leading-relaxed">
               Both switches must be on before a single real message is sent. Keeping them in the
               environment rather than the database is deliberate: enabling live sending should take
               a deployment, not a click.
@@ -132,7 +132,7 @@ export default async function Settings() {
               v={`${config.schedule.start}–${config.schedule.end} ${config.schedule.timezone}`} />
             <Row k="Auto-pause bounce rate" v={`${config.autoPause.bounceRateThreshold}% after ${config.autoPause.minSendsBeforeBounceCheck} sends`} />
             <Row k="Auto-pause failure streak" v={`${config.autoPause.consecutiveFailuresThreshold} consecutive failures`} />
-            <p className="text-[11px] text-muted pt-2 mt-2 hairline">
+            <p data-ui="description" className="text-[11px] text-muted pt-2 mt-2 hairline">
               Per-mailbox limits are set on{" "}
               <Link href="/settings/mailboxes" className="link">Mailboxes</Link>.
             </p>
@@ -169,7 +169,7 @@ export default async function Settings() {
         </div>
       </Card>
 
-      <Card title="Recipient eligibility rules"
+      <Card className="crm-demo-guide" title="Recipient eligibility rules"
         subtitle="Enforced server-side at selection, at campaign build, at queueing and again immediately before each send — and not configurable from the UI">
         <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1.5 text-[12px]">
           {ELIGIBILITY_RULES.map((r) => (

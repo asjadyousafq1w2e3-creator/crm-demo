@@ -35,7 +35,7 @@ export const viewport: Viewport = {
  */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const theme = (await cookies()).get("theme")?.value;
-  const attr = theme === "light" || theme === "dark" ? theme : undefined;
+  const attr = theme === "light" || theme === "dark" ? theme : theme === "system" ? undefined : "light";
 
   return (
     <html lang="en" data-theme={attr} suppressHydrationWarning

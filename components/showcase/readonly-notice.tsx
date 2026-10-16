@@ -38,6 +38,6 @@ export function ReadonlyNotice() {
     return () => { document.removeEventListener("submit", submit, true); document.removeEventListener("click", click, true); if (timer.current) clearTimeout(timer.current); };
   }, []);
   return visible ? <div role="status" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] max-w-[calc(100vw-2rem)] w-max rounded-xl border border-accent/30 bg-panel shadow-pop px-5 py-4 flex items-center gap-3 text-ink text-[13px]">
-    <Icon name="visibility" size={22}/><span>This is a display-only demo. Nothing is saved or sent.</span><button type="button" aria-label="Dismiss demo notice" onClick={() => setVisible(false)} className="text-muted p-1"><Icon name="close" size={17}/></button>
+    <Icon name="visibility" size={22}/><span>Demo only. Changes aren’t saved.</span><button type="button" aria-label="Dismiss demo notice" onClick={() => setVisible(false)} className="text-muted p-1"><Icon name="close" size={17}/></button>
   </div> : null;
 }

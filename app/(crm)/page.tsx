@@ -111,16 +111,16 @@ export default async function Dashboard() {
         }
       />
 
-      <PipelineBoard />
+      {!isCrmShowcase() && <PipelineBoard />}
 
-      {footerBlocker && (
+      {!isCrmShowcase() && footerBlocker && (
         <Note tone="bad">
           <strong>No campaign can start yet.</strong> {footerBlocker}{" "}
           <Link href="/settings" className="link">Open settings</Link>.
         </Note>
       )}
 
-      {v("VERIFIED") === 0 && (
+      {!isCrmShowcase() && v("VERIFIED") === 0 && (
         <Note tone="warn">
           <strong>Outreach is blocked, and that is correct.</strong> No pharmacy has been
           business-verified yet, so campaign eligibility returns zero. The system will not invent
@@ -170,7 +170,7 @@ export default async function Dashboard() {
             <Meter label="Owner or pharmacist-in-charge" value={withOwner} total={total} tone="ok" />
             <Meter label="NPI" value={withNpi} total={total} tone="neutral" />
             <Meter label="Website" value={withWebsite} total={total} tone="warn"
-              caption={withWebsite === 0
+              caption={!isCrmShowcase() && withWebsite === 0
                 ? "No government source publishes it — only discovery or a commercial file will fill this."
                 : undefined} />
           </div>
@@ -184,7 +184,7 @@ export default async function Dashboard() {
             { label: "Completed", value: task("COMPLETED"), tone: "ok" },
             { label: "Blocked", value: task("BLOCKED"), tone: "bad" },
           ] as Slice[]).filter((d) => d.value > 0)} empty="No verification tasks yet." />
-          <p className="text-[11px] text-muted mt-3 pt-3 hairline leading-relaxed">
+          <p data-ui="description" className="text-[11px] text-muted mt-3 pt-3 hairline leading-relaxed">
             A task is a dimension of one record that a human must confirm — licence, ownership,
             operational status, pharmacy type or contact details.
           </p>
@@ -236,7 +236,7 @@ export default async function Dashboard() {
                 data={byLead
                   .filter((l) => l.leadStatus !== "NOT_CONTACTED" && l._count > 0)
                   .map((l) => ({ label: l.leadStatus.replace(/_/g, " ").toLowerCase(), value: l._count }))}
-                empty={`Nothing contacted yet — all ${total.toLocaleString()} records are "not contacted".`} />
+                empty={isCrmShowcase() ? "No leads yet." : `Nothing contacted yet — all ${total.toLocaleString()} records are "not contacted".`} />
             </Card>
 
             <Card title="Needs your attention">

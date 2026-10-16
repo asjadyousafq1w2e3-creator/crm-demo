@@ -250,3 +250,9 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 *::-webkit-scrollbar-thumb { @apply bg-line rounded-full border-[3px] border-solid border-transparent bg-clip-content; }
 *::-webkit-scrollbar-thumb:hover { @apply bg-muted/50 bg-clip-content; }
 *::-webkit-scrollbar-track { background: transparent; }
+
+/* The public CRM preview keeps headings and controls, with supplementary guidance removed. */
+.crm-demo-compact [data-ui="description"],
+.crm-demo-compact [data-ui="guidance"],
+.crm-demo-compact .crm-demo-guide,
+.crm-demo-compact .card-sub { display: none; }

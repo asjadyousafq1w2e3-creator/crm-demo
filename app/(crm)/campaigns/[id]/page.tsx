@@ -163,7 +163,7 @@ export default async function CampaignDetail({ params, searchParams }: {
               </li>
             ))}
           </ul>
-          <p className="t-small text-muted mt-3 pt-3 hairline">
+          <p data-ui="description" className="t-small text-muted mt-3 pt-3 hairline">
             There is no spam-word list here on purpose. Receivers score on authentication,
             sending history and how recipients react — not vocabulary — and writing to dodge a
             classifier is evasion rather than deliverability.
@@ -305,7 +305,7 @@ export default async function CampaignDetail({ params, searchParams }: {
           )}
 
           {review.assignedCounts.length > 0 && (
-            <p className="text-[11px] text-muted mt-3 pt-3 hairline">
+            <p data-ui="description" className="text-[11px] text-muted mt-3 pt-3 hairline">
               {review.assignedCounts.map((a) => `${a.count.toLocaleString()} → ${a.email}`).join(" · ")}
               {" "}already have an owning mailbox from an earlier conversation.
             </p>

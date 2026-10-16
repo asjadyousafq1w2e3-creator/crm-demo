@@ -83,7 +83,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
   const home = await crmHomePath();
 
   const theme = (await cookies()).get("theme")?.value;
-  const themeMode = theme === "light" || theme === "dark" ? theme : "system";
+  const themeMode = theme === "light" || theme === "dark" || theme === "system" ? theme : "light";
 
   const [unread, dueFollowUps, undecided] = await Promise.all([
     can(session.role, "inbox.view")
@@ -128,7 +128,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
   const initials = (session.name || session.email).trim().slice(0, 1).toUpperCase();
 
   return (
-    <div className="min-h-screen">
+    <div className={isCrmShowcase() ? "min-h-screen crm-demo-compact" : "min-h-screen"}>
       {isCrmShowcase() && <ReadonlyNotice />}
       {/* Sending mode, across the top of every screen, so it is never a surprise. */}
       <div className={`fixed top-0 inset-x-0 z-50 h-banner flex items-center justify-between
@@ -136,7 +136,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
         <span className="flex items-center gap-2 truncate">
           <span className={`w-1.5 h-1.5 rounded-full ${live ? "bg-bad" : "bg-accent"} animate-pulse`} />
           {isCrmShowcase()
-            ? "DEMO PREVIEW — fictional sample data · saving and live sending are disabled"
+            ? "expressdiabetics CRM"
             : config.emailMode !== "gmail"
             ? "Demo email mode — outbound is simulated, nothing can leave the application"
             : live
@@ -145,7 +145,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
         </span>
         <span className="hidden md:flex items-center gap-1.5 text-muted">
           <Icon name="shield" size={14} />
-          {isCrmShowcase() ? "Display only" : config.emailMode === "gmail" ? "Gmail gateway" : "Mock gateway"}
+          {isCrmShowcase() ? "Demo" : config.emailMode === "gmail" ? "Gmail gateway" : "Mock gateway"}
         </span>
       </div>
 
@@ -206,11 +206,11 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
           backdrop-blur-xl border-b border-line flex items-center justify-between gap-4 px-5">
           <GlobalSearch />
           <div className="flex items-center gap-3 shrink-0">
-            <span className="hidden lg:flex items-center gap-2 bg-raised border border-line
+            <span className="crm-demo-guide hidden lg:flex items-center gap-2 bg-raised border border-line
               rounded-lg px-2.5 py-1">
               <span className="t-label text-muted">Mode</span>
               <span className={`badge ${live ? "tone-bad" : "tone-accent"}`}>
-                {config.emailMode === "gmail" ? (live ? "Live" : "Gmail · off") : "Sandbox"}
+                {isCrmShowcase() ? "Demo" : config.emailMode === "gmail" ? (live ? "Live" : "Gmail · off") : "Sandbox"}
               </span>
             </span>
             <Link href="/account" className="w-8 h-8 rounded-full bg-accent/12 text-accent

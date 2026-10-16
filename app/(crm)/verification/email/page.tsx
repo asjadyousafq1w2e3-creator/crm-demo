@@ -1,3 +1,4 @@
+import { isCrmShowcase } from "@/lib/showcase-mode";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requirePagePermission } from "@/lib/auth";
@@ -73,7 +74,7 @@ export default async function EmailVerification({ searchParams }: {
 
       {error && <Note tone="bad">{error}</Note>}
 
-      {!configured && (
+      {!isCrmShowcase() && !configured && (
         <Note tone="warn">
           <strong>No verifier is configured.</strong> Put your key in{" "}
           <code>web/.env</code> as <code>REOON_API_KEY=&quot;your-key&quot;</code> and restart the
@@ -113,7 +114,7 @@ export default async function EmailVerification({ searchParams }: {
       )}
 
       {n("NOT_CHECKED") === withEmail && withEmail > 0 && (
-        <Note tone="warn">
+        <Note tone="neutral">
           <strong>Nothing has been verified yet.</strong> All {withEmail.toLocaleString()} addresses
           are unchecked, which is why no campaign has an eligible recipient. Expect 15–30% of a
           never-verified list to fail; sending to it first would burn the sending domain for months.
@@ -319,7 +320,7 @@ export default async function EmailVerification({ searchParams }: {
                         remain. Cap the round, or do it a state at a time.
                       </p>
                     ) : (
-                      <p className="t-small text-muted leading-relaxed">
+                      <p data-ui="description" className="t-small text-muted leading-relaxed">
                         Enough credit to check all {unchecked.total.toLocaleString()} unchecked
                         addresses.
                       </p>
@@ -336,7 +337,7 @@ export default async function EmailVerification({ searchParams }: {
               .map((s) => ({ label: s.state, value: s.count }))}
               unit="addresses" empty="Every address has been checked." />
             {unchecked.duplicates > 0 && (
-              <p className="t-small text-muted mt-3 pt-3 hairline">
+              <p data-ui="description" className="t-small text-muted mt-3 pt-3 hairline">
                 {unchecked.duplicates.toLocaleString()} of these are the same address on more than
                 one record. Reoon charges once per distinct address and removes the rest.
               </p>

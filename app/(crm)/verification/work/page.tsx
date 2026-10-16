@@ -259,7 +259,7 @@ export default async function VerificationWork({ searchParams }: {
               </div>
               <input type="hidden" name="skipped" value={sp.skipped ?? ""} />
 
-              <p className="t-small text-muted mt-3 leading-relaxed">
+              <p data-ui="description" className="t-small text-muted mt-3 leading-relaxed">
                 Leave a check untouched and it stays as it was. A record reaches{" "}
                 <strong>verified</strong> only when licence, ownership and trading status are all
                 confirmed; any <strong>failed</strong> excludes it outright, and any{" "}

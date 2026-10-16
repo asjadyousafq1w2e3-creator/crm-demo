@@ -1,3 +1,4 @@
+import { isCrmShowcase } from "@/lib/showcase-mode";
 import { requirePagePermission } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { config } from "@/lib/config";
@@ -65,7 +66,7 @@ export default async function Mailboxes({ searchParams }: {
       )}
       {sp.error && <Note tone="bad">{ERRORS[sp.error] ?? sp.error}</Note>}
 
-      {config.emailMode !== "gmail" && (
+      {!isCrmShowcase() && config.emailMode !== "gmail" && (
         <Note tone="warn">
           <span className="badge tone-warn mr-2">Demo email mode</span>
           <code>EMAIL_MODE={config.emailMode}</code>. Every mailbox below — including a connected
@@ -170,7 +171,7 @@ export default async function Mailboxes({ searchParams }: {
         </div>
       )}
 
-      {config.emailMode !== "gmail" && (
+      {!isCrmShowcase() && config.emailMode !== "gmail" && (
         <Card title="Add a mock mailbox"
           subtitle="Demo mode only. A mock mailbox sends nothing — it records what would have been sent, so the queue, router and scheduler can be exercised end to end.">
           <form action={addMockMailbox} className="flex flex-wrap items-end gap-2">

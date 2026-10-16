@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { isCrmShowcase } from "@/lib/showcase-mode";
 import { Icon, type IconName } from "./icon";
 import { pipeline, type Stage, type StageState } from "@/lib/pipeline";
 
@@ -84,6 +85,7 @@ function StageCard({ stage, n }: { stage: Stage; n: number }) {
  * place itself.
  */
 export async function StageBar({ stage: key }: { stage: string }) {
+  if (isCrmShowcase()) return null;
   const { stages } = await pipeline();
   const i = stages.findIndex((s) => s.key === key);
   if (i < 0) return null;

@@ -125,7 +125,7 @@ export default async function VerificationBatch({ params, searchParams }: {
                 <Icon name="refresh" size={16} /> Check progress
               </button>
             </form>
-            <p className="t-small text-muted leading-relaxed">
+            <p data-ui="description" className="t-small text-muted leading-relaxed">
               Reoon processes tasks one at a time, so a large round can wait behind another.
               Checking is free and applies the results automatically once the task completes.
               {batch.lastPolledAt && (
@@ -144,7 +144,7 @@ export default async function VerificationBatch({ params, searchParams }: {
               <Icon name="send" size={16} /> Submit to the verifier
             </button>
           </form>
-          <p className="t-small text-muted mt-3 leading-relaxed">
+          <p data-ui="description" className="t-small text-muted mt-3 leading-relaxed">
             Duplicate addresses are removed by the provider before charging, so the cost is the
             number of distinct addresses rather than the row count.
           </p>
@@ -158,13 +158,13 @@ export default async function VerificationBatch({ params, searchParams }: {
             <a href={`/api/verify/export?batch=${batch.id}`} className="btn btn-primary">
               <Icon name="upload_file" size={16} /> Download the CSV
             </a>
-            <p className="t-small text-muted mt-3 leading-relaxed">
+            <p data-ui="description" className="t-small text-muted mt-3 leading-relaxed">
               Any verifier will do — Bouncer, ZeroBounce, NeverBounce. Keep the{" "}
               <code>pharmacy_id</code> column in the file they give you back and the results match
               themselves up; an email column works too.
             </p>
             {!config.verifier.apiKey && (
-              <p className="t-small text-muted mt-2 pt-2 hairline leading-relaxed">
+              <p data-ui="description" className="t-small text-muted mt-2 pt-2 hairline leading-relaxed">
                 No verifier API key is configured, so this round is a file exchange. Set{" "}
                 <code>EMAIL_VERIFIER_API_KEY</code> and the same batch runs automatically instead —
                 nothing else about the flow changes.
@@ -182,7 +182,7 @@ export default async function VerificationBatch({ params, searchParams }: {
                 <Icon name="check_circle" size={16} /> Apply to the registry
               </button>
             </form>
-            <p className="t-small text-muted mt-3 pt-3 hairline leading-relaxed">
+            <p data-ui="description" className="t-small text-muted mt-3 pt-3 hairline leading-relaxed">
               Only <strong>valid</strong> makes an address eligible for outreach. Catch-all means
               the domain accepts everything and proves nothing, so it stays out — as does risky.
               Anything the verifier did not answer for returns to unchecked rather than being

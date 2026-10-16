@@ -17,12 +17,12 @@ export default async function Login({ searchParams }: {
   if (!showcase && await getSession()) redirect(home);
   const sp = await searchParams;
   const theme = (await cookies()).get("theme")?.value;
-  const themeMode = theme === "light" || theme === "dark" ? theme : "system";
+  const themeMode = theme === "light" || theme === "dark" || theme === "system" ? theme : "light";
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className={showcase ? "min-h-screen grid place-items-center" : "min-h-screen grid lg:grid-cols-2"}>
       {/* Left: the sign-in form itself. */}
-      <div className="flex items-center justify-center px-6 py-10">
+      <div className="w-full flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-[360px]">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -32,10 +32,8 @@ export default async function Login({ searchParams }: {
             <ThemeToggle initial={themeMode} />
           </div>
 
-          <h1 className="text-[20px] font-semibold tracking-tight">Sign in</h1>
-          <p className="text-[13px] text-muted mt-1 mb-5">
-            {showcase ? "Explore the original CRM with fictional sample records. No account setup or database is needed." : "Access is per-operator. Ask an owner or admin if you need an account."}
-          </p>
+          <h1 className="text-[20px] font-semibold tracking-tight mb-5">Sign in</h1>
+          {!showcase && <p className="text-[13px] text-muted mt-1 mb-5">Access is per-operator. Ask an owner or admin if you need an account.</p>}
 
           {sp.error === "suspended" ? (
             <div className="rounded-lg border border-bad/30 bg-bad-container/50 px-3 py-2 mb-4
@@ -71,14 +69,14 @@ export default async function Login({ searchParams }: {
             <button className="btn btn-primary w-full" type="submit">Sign in</button>
           </form>
 
-          <p className="text-[11px] text-muted mt-5 leading-relaxed">
-            {showcase ? <>Public demo: <code>{SHOWCASE_EMAIL}</code> / <code>{SHOWCASE_PASSWORD}</code>. Display only — nothing is saved or sent.</> : <>Passwords are stored only as a scrypt hash — never in readable form. Sessions expire after 12 hours, and a suspended account stops working on its next request.</>}
-          </p>
+          {!showcase && <p className="text-[11px] text-muted mt-5 leading-relaxed">
+            Passwords are stored only as a scrypt hash. Sessions expire after 12 hours.
+          </p>}
         </div>
       </div>
 
       {/* Right: what this system is, and the one thing it will not do. */}
-      <div className="hidden lg:flex flex-col justify-center gap-5 px-12 py-10 bg-panel
+      {!showcase && <div className="hidden lg:flex flex-col justify-center gap-5 px-12 py-10 bg-panel
                       border-l border-line">
         <div>
           <h2 className="text-[17px] font-semibold tracking-tight">
@@ -109,7 +107,7 @@ export default async function Login({ searchParams }: {
           Email mode: <code className="text-ink">{config.emailMode}</code> · live sending{" "}
           <code className="text-ink">{String(config.liveSendingEnabled)}</code>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
