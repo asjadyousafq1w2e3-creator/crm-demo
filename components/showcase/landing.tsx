@@ -102,10 +102,10 @@ export function Landing({ links }: { links: Links }) {
       </div>
     </header>
 
-    <section className="pf-hero pf-container" id="main-content">
+    <section className="pf-hero-section" id="main-content"><div className="pf-hero pf-container">
       <div className="pf-hero-copy">
         <span className="pf-eyebrow">PHARMACY FIRST / TRADE SUPPLY</span>
-        <h1>Wholesale medicine<br/>supply for<br/><span>your pharmacy.</span></h1>
+        <h1>Wholesale medicine<span>for your pharmacy.</span></h1>
         <p>Medicines and wellness essentials for pharmacy businesses. Explore our product range and discover a business partner focused on pharmacy supply.</p>
         <div className="pf-hero-buttons">
           <a className="pf-button" href="#medicines">Browse medicines <Arrow/></a>
@@ -117,7 +117,7 @@ export function Landing({ links }: { links: Links }) {
         <Image src="/images/pharmacy-professional.webp" alt="A pharmacist checking medicine stock on pharmacy shelves" width={1600} height={1067} priority sizes="(max-width: 760px) 100vw, 50vw"/>
         <figcaption><span>FOCUSED ON PHARMACY</span><span>From medicine supply to business relationships.</span></figcaption>
       </figure>
-    </section>
+    </div></section>
 
     <section className="pf-supply-strip" aria-label="Our supply focus">
       <div className="pf-container">{benefits.map((benefit, i) => <div key={benefit.title}>
